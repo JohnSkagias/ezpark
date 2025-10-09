@@ -43,5 +43,5 @@ export default function Map({ geojson, center = [23.709115, 37.968455], zoom = 1
     if (src) src.setData(geojson);
   }, [geojson]);
 
-  return <div ref={mapRef} style={{ width: "50%", height: "70vh" }} />;
+  return <div ref={mapRef} style={{ width: "100%", height: "70vh" }} />;
 }
