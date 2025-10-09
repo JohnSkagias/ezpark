@@ -1,0 +1,41 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Road {
+  id           String   @id @default(uuid())
+  name         String
+  municipality String
+  markets      Market[]
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("roads")
+}
+
+model Market {
+  id                 String   @id @default(uuid())
+  roadId             String   @map("road_id")
+  weekday            Int
+  startTime          String   @map("start_time")
+  endTime            String   @map("end_time")
+  bufferBeforeHours  Int      @map("buffer_before_hours")
+  bufferAfterHours   Int      @map("buffer_after_hours")
+  exceptions         Json?
+  road               Road     @relation(fields: [roadId], references: [id])
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  @@map("markets")
+}
