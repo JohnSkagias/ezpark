@@ -16,16 +16,16 @@ export default function HomePage() {
   useEffect(() => { runSearch({ lat: 37.979, lng: 23.7265, radius: 2000 }); }, []);
 
   return (
-    <main className="grid grid-cols-1 lg:grid-cols-12 min-h-screen">
+  <main className="grid grid-cols-1 lg:grid-cols-[minmax(0,550px)_1fr] min-h-screen">
       {/* Left panel (full height) */}
-      <div className="lg:col-span-4 p-6 bg-gradient-to-br from-[#0b1320] via-[#0e1b12] to-[#12311f]">
-        <div className="max-w-md mx-auto h-full">
+  <div className="p-6 bg-gradient-to-br from-[#0b1320] via-[#0e1b12] to-[#12311f]">
+        <div className="w-full h-full">
           <Sidebar onSearch={runSearch} />
-        </div>
+        </div>  
       </div>
 
       {/* Right panel (full height) */}
-      <div className="lg:col-span-8 p-6 bg-neutral-900">
+  <div className="p-6 bg-neutral-900">
         <div className="space-y-6 max-w-[1100px] mx-auto h-full">
           <div className="rounded-2xl border border-white/10 overflow-hidden shadow-lg h-[460px]">
             <Map geojson={data} />
