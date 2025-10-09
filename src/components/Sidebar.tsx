@@ -25,11 +25,11 @@ export default function Sidebar({ onSearch }: Props) {
       <div className="flex flex-col h-full justify-between">
         <div className="space-y-4">
           <div className="text-2xl font-extrabold tracking-tight">
-            ezpark<span className="text-emerald-400">.gr</span>
+          <img src="/ezparkTitle.svg" alt="ezpark.gr" className="h-20 w-auto" />
           </div>
 
           {/* Κουμπιά mode - segmented control with sliding indicator */}
-          <div className="relative rounded-full bg-white/10 p-2 mt-14 overflow-hidden">
+          <div className="relative rounded-full bg-white/10 p-2 mt-[clamp(1.5rem,6vh,5rem)] overflow-hidden">
             <div
               aria-hidden
               className="absolute inset-y-2 left-2 rounded-full bg-emerald-500 transition-transform duration-300"
@@ -90,15 +90,14 @@ export default function Sidebar({ onSearch }: Props) {
               <p className="text-xs text-white/60">* geocoding αργότερα</p>
             </div>
           )}
-        </div>
-
-        <div>
-          <Button
-            className="w-full rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/10"
-            onClick={() => onSearch({ lat, lng, radius })}
-          >
-            Αναζήτηση
-          </Button>
+          <div className="mt-3">
+            <Button
+              className="w-full rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/10"
+              onClick={() => onSearch({ lat, lng, radius })}
+            >
+              Αναζήτηση
+            </Button>
+          </div>
         </div>
       </div>
     </aside>
