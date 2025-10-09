@@ -32,8 +32,8 @@ export default function Sidebar({ onSearch }: Props) {
           <div className="relative rounded-full bg-white/10 p-2 mt-[clamp(1.5rem,6vh,5rem)] overflow-hidden">
             <div
               aria-hidden
-              className="absolute inset-y-2 left-2 rounded-full bg-emerald-500 transition-transform duration-300"
-              style={{ width: 'calc(50% - 0.5rem)', transform: mode === "night" ? "translateX(0%)" : "translateX(100%)" }}
+              className="absolute inset-y-2 left-2 rounded-full transition-transform duration-300"
+              style={{ width: 'calc(50% - 0.5rem)', backgroundColor: '#458841', transform: mode === "night" ? "translateX(0%)" : "translateX(100%)" }}
             />
             <div className="relative grid grid-cols-2">
               <button
@@ -57,8 +57,8 @@ export default function Sidebar({ onSearch }: Props) {
           <div className="relative rounded-full bg-white/10 p-2 overflow-hidden">
             <div
               aria-hidden
-              className="absolute inset-y-2 left-2 rounded-full bg-sky-600 transition-transform duration-300"
-              style={{ width: 'calc(50% - 0.5rem)', transform: scope === "all" ? "translateX(0%)" : "translateX(100%)" }}
+              className="absolute inset-y-2 left-2 rounded-full transition-transform duration-300"
+              style={{ width: 'calc(50% - 0.5rem)', backgroundColor: '#415A88', transform: scope === "all" ? "translateX(0%)" : "translateX(100%)" }}
             />
             <div className="relative grid grid-cols-2">
               <button
@@ -98,7 +98,7 @@ export default function Sidebar({ onSearch }: Props) {
               Αναζήτηση
             </Button>
           </div>
-        </div>
+        </div>  
       </div>
     </aside>
   );
