@@ -9,7 +9,7 @@ type MapProps = {
   zoom?: number;
 };
 
-export default function Map({ geojson, center = [23.7275, 37.9838], zoom = 12 }: MapProps) {
+export default function Map({ geojson, center = [23.709115, 37.968455], zoom = 11.5 }: MapProps) {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapObj = useRef<maplibregl.Map | null>(null);
 
@@ -18,7 +18,7 @@ export default function Map({ geojson, center = [23.7275, 37.9838], zoom = 12 }:
 
     mapObj.current = new maplibregl.Map({
       container: mapRef.current,
-      style: "https://demotiles.maplibre.org/style.json",
+      style: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
       center,
       zoom,
     });
@@ -43,5 +43,5 @@ export default function Map({ geojson, center = [23.7275, 37.9838], zoom = 12 }:
     if (src) src.setData(geojson);
   }, [geojson]);
 
-  return <div ref={mapRef} style={{ width: "100%", height: "60vh" }} />;
+  return <div ref={mapRef} style={{ width: "50%", height: "70vh" }} />;
 }
