@@ -55,7 +55,7 @@ export async function GET(req: Request) {
       },
     }));
 
-  const suggestedWindow = mode === "night" ? "21:00 - 04:00" : "14:30 - 16:30";
+  const suggestedWindow = mode === "night" ? "21:00 - 04:00" : "16:30 - 18:30";
 
   return NextResponse.json({
     geojson: { type: "FeatureCollection", features: features as any },
