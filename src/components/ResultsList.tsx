@@ -5,7 +5,7 @@ type Props = { features: GeoJSON.Feature[] };
 export default function ResultsList({ features }: Props) {
   return (
     <div className="space-y-3">
-      <h2 className="text-lg font-semibold">Προτάσεις</h2>
+      <h2 className="text-lg font-semibold">Αποτελέσματα</h2>
       <ul className="space-y-3">
         {features.map((f, i) => {
           const p = (f.properties as any) || {};

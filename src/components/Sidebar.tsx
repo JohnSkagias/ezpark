@@ -14,7 +14,7 @@ export default function Sidebar({ onSearch }: Props) {
   const [addr, setAddr] = useState("");
   const [lat, setLat] = useState(37.979);
   const [lng, setLng] = useState(23.7265);
-  const [radius, setRadius] = useState(2000);
+  const [radius, setRadius] = useState(20000); // Το radius μεσα στο οποιο θα γινεται η αναζητηση
   const handleMode = (m: "night" | "long") => {
     setMode(m);
     onSearch({ lat, lng, radius, mode: m }); // trigger νέα αναζήτηση
