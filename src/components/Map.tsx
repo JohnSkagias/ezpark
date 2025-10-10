@@ -109,20 +109,16 @@ export default function Map({ geojson, center = [23.709115, 37.963455], zoom = 1
         const url = `https://www.google.com/maps/search/?api=1&query=${q}`;
 
         const html = `
-    <div style="font-weight:600;color:#111;margin-bottom:2px">${name}</div>
-    <div style="color:#555;margin-bottom:8px">${muni}</div>
-    <a href="${url}" target="_blank" rel="noopener noreferrer"
-       style="
-         display:inline-block;padding:6px 10px;border-radius:8px;
-         background:#1a73e8;color:#fff;text-decoration:none;
-         font-size:12px;font-weight:600;
-       ">
-      Open in Google Maps
-    </a>
-  `;
+          <div style="font-weight:700;margin-bottom:2px">${name}</div>
+          <div style="opacity:.8;margin-bottom:8px">${muni}</div>
+          <a href="${url}" target="_blank" rel="noopener noreferrer" class="ezpopup-btn">
+            Open in Google Maps
+          </a>
+        `;
+
 
         mapObj.current!.flyTo({ center: coords, zoom: 15 });
-        new maplibregl.Popup({ closeButton: false, offset: 10 })
+        new maplibregl.Popup({ closeButton: false, offset: 10, className: "ezpopup" })
           .setLngLat(coords)
           .setHTML(html)
           .addTo(mapObj.current!);

@@ -120,3 +120,37 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* ezpark map popup */
+.maplibregl-popup.ezpopup .maplibregl-popup-content{
+  background: rgba(17,17,17,0.7); /* ~70% opacity */
+  color: #fff;
+  border-radius: 14px;
+  padding: 10px 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.35);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: ezpop-in 180ms ease-out;
+}
+.maplibregl-popup.ezpopup .maplibregl-popup-tip{
+  border-top-color: rgba(17,17,17,0.7);
+  border-bottom-color: rgba(17,17,17,0.7);
+}
+
+/* εμφάνιση του link σαν κουμπί */
+.ezpopup-btn{
+  display:inline-block;
+  padding:6px 10px;
+  border-radius: 10px;
+  background:#1a73e8;
+  color:#fff;
+  text-decoration:none;
+  font-size:12px;
+  font-weight:600;
+}
+
+/* animation */
+@keyframes ezpop-in{
+  from{ transform: translateY(6px); opacity: 0; }
+  to  { transform: translateY(0);   opacity: 1; }
+}
