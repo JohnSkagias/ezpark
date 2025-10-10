@@ -105,9 +105,20 @@ export default function Map({ geojson, center = [23.709115, 37.963455], zoom = 1
         const name = props.name || "Οδός";
         const muni = props.municipality || "";
 
+        const q = encodeURIComponent(`${name}, ${muni}`);
+        const url = `https://www.google.com/maps/search/?api=1&query=${q}`;
+
         const html = `
-    <div style="font-weight:600;color:#111">${name}</div>
-    <div style="color:#555">${muni}</div>
+    <div style="font-weight:600;color:#111;margin-bottom:2px">${name}</div>
+    <div style="color:#555;margin-bottom:8px">${muni}</div>
+    <a href="${url}" target="_blank" rel="noopener noreferrer"
+       style="
+         display:inline-block;padding:6px 10px;border-radius:8px;
+         background:#1a73e8;color:#fff;text-decoration:none;
+         font-size:12px;font-weight:600;
+       ">
+      Open in Google Maps
+    </a>
   `;
 
         mapObj.current!.flyTo({ center: coords, zoom: 15 });
@@ -116,6 +127,7 @@ export default function Map({ geojson, center = [23.709115, 37.963455], zoom = 1
           .setHTML(html)
           .addTo(mapObj.current!);
       });
+
 
       mapObj.current!.on("mouseenter", "road-pins-circle", () => (mapObj.current!.getCanvas().style.cursor = "pointer"));
       mapObj.current!.on("mouseleave", "road-pins-circle", () => (mapObj.current!.getCanvas().style.cursor = ""));
