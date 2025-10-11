@@ -24,8 +24,8 @@ export default function Sidebar({ onSearch }: Props) {
     <aside className="h-full p-5 text-white">
       <div className="flex flex-col h-full justify-between">
         <div className="space-y-4">
-          <div className="text-2xl font-extrabold tracking-tight">
-            <img src="/ezparkTitle.svg" alt="ezpark.gr" className="h-20 w-auto" />
+          <div className="flex items-center justify-center">
+            <img src="/ezparkTitle.svg" alt="ezpark.gr" className="h-26 w-auto" />
           </div>
 
           {/* Mode segmented */}

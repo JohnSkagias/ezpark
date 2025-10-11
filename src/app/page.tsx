@@ -13,62 +13,63 @@ export default function HomePage() {
     new Intl.DateTimeFormat("el-GR", { weekday: "long" })
       .format(d)
       .replace(/^./, (c) => c.toUpperCase());
-      
+
   const runSearch = async ({
-    lat,
-    lng,
-    radius,
-    mode,
-  }: {
-    lat: number;
-    lng: number;
-    radius: number;
-    mode: "night" | "long";
-  }) => {
+    lat, lng, radius, mode,
+  }: { lat: number; lng: number; radius: number; mode: "night" | "long" }) => {
     const res = await fetch(`/api/search?lat=${lat}&lng=${lng}&radius=${radius}&mode=${mode}`);
     const json = await res.json();
     setData(json.geojson);
     setSuggested(json.suggestedWindow);
-
-    // τίτλος πάνω από τον χάρτη — πάντα "σήμερα {Μέρα}"
-    const today = new Date();
-    setLabel(`σήμερα ${dayNameGR(today)}`);
-
+    setLabel(`σήμερα ${dayNameGR(new Date())}`);
   };
 
-  useEffect(() => {
-    runSearch({ lat: 37.979, lng: 23.7265, radius: 2000, mode: "night" });
-  }, []);
+  useEffect(() => { runSearch({ lat: 37.979, lng: 23.7265, radius: 2000, mode: "night" }); }, []);
 
   return (
-    <main className="grid grid-cols-1 lg:grid-cols-[minmax(0,550px)_1fr] min-h-screen">
-      {/* Left panel */}
-      <div className="p-6 bg-gradient-to-br from-[#0b1320] via-[#0e1b12] to-[#12311f]">
-        <div className="w-full h-full">
-          <Sidebar onSearch={runSearch} />
+    <main className="grid grid-cols-1 lg:grid-cols-[33vw_1fr] min-h-screen gap-6 lg:gap-10 p-4 lg:p-8">
+      {/* Floating Sidebar (sticky, full height, 60px radius) */}
+      <div className="relative">
+        <div className="sticky top-6 self-start">
+          <div
+            className="
+              rounded-[46px]
+              border border-white/30
+              overflow-hidden
+              p-10 lg:p-12
+              min-h-[calc(98vh-3rem)]   /* γεμίζει σχεδόν όλο το ύψος */
+              bg-no-repeat bg-cover bg-center
+            "
+            style={{ backgroundImage: "url('/sidebarBackground.svg')" }}
+          >
+            <Sidebar onSearch={runSearch} />
+          </div>
         </div>
       </div>
 
-      {/* Right panel */}
-      <div className="p-6 bg-neutral-900">
-        <div className="space-y-6 max-w-[2000px] mx-auto h-full">
-          {/* Τίτλος */}
-          <h2 className="text-xl font-semibold text-white/90">
-            Προτεινόμενοι Οδοί για <span className="text-emerald-400">{label}</span>
-          </h2>
 
-          <div className="rounded-2xl border border-white/10 overflow-hidden shadow-lg h-[460px]">
+
+      {/* Right panel */}
+      <div className="space-y-5">
+        <h2 className="text-xl font-semibold text-white/90">
+          Προτεινόμενοι Οδοί για <span className="text-emerald-400">{label}</span>
+        </h2>
+
+        {/* Map card */}
+        <div className="rounded-[28px] border border-white/30 overflow-hidden shadow-xl" style={{ padding: 0 }}>
+          <div className="h-[520px]">
             <Map geojson={data} />
           </div>
-
-          {suggested && (
-            <div className="text-sm text-white/70">
-              Προτεινόμενη ώρα: <span className="text-emerald-400 font-medium">{suggested}</span>
-            </div>
-          )}
-
-          <ResultsList features={data.features} />
         </div>
+
+        {suggested && (
+          <div className="text-sm text-white/70">
+            Προτεινόμενη ώρα: <span className="text-emerald-400 font-medium">{suggested}</span>
+          </div>
+        )}
+
+        {/* Full-width list (ίδιο πλάτος με τον χάρτη) */}
+        <ResultsList features={data.features} />
       </div>
     </main>
   );

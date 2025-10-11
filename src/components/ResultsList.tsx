@@ -1,6 +1,3 @@
-import { MapPin } from "lucide-react";
-import React from "react";
-
 type Props = { features: GeoJSON.Feature[] };
 
 export default function ResultsList({ features }: Props) {
@@ -18,28 +15,22 @@ export default function ResultsList({ features }: Props) {
           return (
             <div
               key={i}
-              className="
-                w-[60%] min-w-[400px]
-                rounded-2xl border border-white/10
-                bg-emerald-900/20 backdrop-blur-[2px]
-                px-4 py-3
-                flex items-center justify-between
-                hover:bg-emerald-900/30 transition
-              "
+              className="w-full rounded-[22px] border border-white/30
+                         bg-gradient-to-r from-#3A5145 to-emerald-600/30
+                         px-5 py-4 flex items-center justify-between
+                         hover:from-emerald-700/30 hover:to-emerald-600/20 transition"
             >
-              {/* κείμενο αριστερά */}
               <div>
                 <div className="font-medium">{name}</div>
                 <div className="text-sm text-white/60">{muni}</div>
               </div>
 
-              {/* κουμπί δεξιά */}
               <a
                 href={url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="shrink-0 inline-block px-4 py-2 rounded-lg
-                           bg-emerald-600/80 hover:bg-emerald-600
+                className="shrink-0 inline-block px-5 py-2 rounded-full
+                           bg-emerald-600/85 hover:bg-emerald-600
                            text-white text-sm font-semibold"
               >
                 Open in Google Maps
