@@ -19,6 +19,45 @@ function toPins(fc: GeoJSON.FeatureCollection): GeoJSON.FeatureCollection {
   return { type: "FeatureCollection", features: pts };
 }
 
+function boundsOfCoords(coords: number[][]) {
+  let minLng = 180, minLat = 90, maxLng = -180, maxLat = -90;
+  for (const [lng, lat] of coords) {
+    if (lng < minLng) minLng = lng;
+    if (lat < minLat) minLat = lat;
+    if (lng > maxLng) maxLng = lng;
+    if (lat > maxLat) maxLat = lat;
+  }
+  // Αν είναι μηδενικού εμβαδού, άνοιξε λίγο
+  if (minLng === maxLng) { minLng -= 0.0008; maxLng += 0.0008; }
+  if (minLat === maxLat) { minLat -= 0.0008; maxLat += 0.0008; }
+  return [[minLng, minLat], [maxLng, maxLat]] as [[number, number], [number, number]];
+}
+
+function boundsOfFeatureCollection(fc: GeoJSON.FeatureCollection) {
+  let acc: [[number, number], [number, number]] | null = null;
+
+  for (const f of fc.features) {
+    if (!f.geometry) continue;
+    if (f.geometry.type === "LineString") {
+      const b = boundsOfCoords(f.geometry.coordinates as number[][]);
+      acc = acc
+        ? [[Math.min(acc[0][0], b[0][0]), Math.min(acc[0][1], b[0][1])],
+        [Math.max(acc[1][0], b[1][0]), Math.max(acc[1][1], b[1][1])]]
+        : b;
+    } else if (f.geometry.type === "Point") {
+      const [lng, lat] = f.geometry.coordinates as number[];
+      const b = boundsOfCoords([[lng, lat], [lng, lat]]);
+      acc = acc
+        ? [[Math.min(acc[0][0], b[0][0]), Math.min(acc[0][1], b[0][1])],
+        [Math.max(acc[1][0], b[1][0]), Math.max(acc[1][1], b[1][1])]]
+        : b;
+    }
+  }
+  return acc;
+}
+
+
+
 export default function Map({ geojson, center = [23.709115, 37.963455], zoom = 12 }: MapProps) {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapObj = useRef<maplibregl.Map | null>(null);
@@ -69,9 +108,23 @@ export default function Map({ geojson, center = [23.709115, 37.963455], zoom = 1
 
   useEffect(() => {
     if (!mapObj.current || !geojson) return;
-    (mapObj.current.getSource("roads") as maplibregl.GeoJSONSource)?.setData(geojson);
-    (mapObj.current.getSource("road-pins") as maplibregl.GeoJSONSource)?.setData(toPins(geojson));
+
+    const roadsSrc = mapObj.current.getSource("roads") as maplibregl.GeoJSONSource | undefined;
+    const pinsSrc = mapObj.current.getSource("road-pins") as maplibregl.GeoJSONSource | undefined;
+
+    if (roadsSrc) roadsSrc.setData(geojson);
+    if (pinsSrc) pinsSrc.setData(toPins(geojson));
+
+    const b = boundsOfFeatureCollection(geojson);
+    if (b) {
+      mapObj.current.fitBounds(b, {
+        padding: { top: 40, right: 40, bottom: 40, left: 40 },
+        duration: 700,
+        maxZoom: 13, // μη ζουμάρει υπερβολικά
+      });
+    }
   }, [geojson]);
+
 
   return <div ref={mapRef} style={{ width: "100%", height: "100%" }} />;
 }
