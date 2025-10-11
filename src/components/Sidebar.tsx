@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -11,13 +11,35 @@ type Props = {
 export default function Sidebar({ onSearch }: Props) {
   const [mode, setMode] = useState<"night" | "long">("night");
   const [scope, setScope] = useState<"all" | "addr">("all");
+
   const [addr, setAddr] = useState("");
+  const [suggests, setSuggests] = useState<{ label: string; lat: number; lng: number }[]>([]);
   const [lat, setLat] = useState(37.979);
   const [lng, setLng] = useState(23.7265);
   const [radius, setRadius] = useState(20000); // Το radius μεσα στο οποιο θα γινεται η αναζητηση
+
+
+  // --- debounce για geocoding ---
+  const tRef = useRef<NodeJS.Timeout | null>(null);
+  useEffect(() => {
+    if (scope !== "addr") return;
+    if (tRef.current) clearTimeout(tRef.current);
+    if (addr.trim().length < 3) {
+      setSuggests([]);
+      return;
+    }
+    tRef.current = setTimeout(async () => {
+      const res = await fetch(`/api/geocode?q=${encodeURIComponent(addr)}`);
+      const json = await res.json();
+      setSuggests(json.results || []);
+    }, 300);
+  }, [addr, scope]);
+
+
+  // αλλαγή mode → τρέξε αναζήτηση
   const handleMode = (m: "night" | "long") => {
     setMode(m);
-    onSearch({ lat, lng, radius, mode: m }); // trigger νέα αναζήτηση
+    onSearch({ lat, lng, radius: scope === "addr" ? 1500 : radius, mode: m });
   };
 
   return (
@@ -56,19 +78,46 @@ export default function Sidebar({ onSearch }: Props) {
           </div>
 
           {scope === "addr" && (
-            <div className="space-y-1">
+            <div className="space-y-1 relative">
               <Label className="text-white/80">Διεύθυνση</Label>
-              <Input value={addr} onChange={(e) => setAddr(e.target.value)}
-                placeholder="π.χ. Πανεπιστημίου 20"
-                className="bg-white/5 border-white/10 text-white placeholder:text-white/60" />
-              <p className="text-xs text-white/60">* geocoding αργότερα</p>
+              <Input
+                value={addr}
+                onChange={(e) => setAddr(e.target.value)}
+                placeholder="π.χ. Δωδεκανήσου 39 Πειραιάς"
+                className="bg-white/5 border-white/10 text-white placeholder:text-white/60"
+              />
+
+              {/* Dropdown προτάσεων */}
+              {suggests.length > 0 && (
+                <div className="absolute z-20 mt-1 w-full rounded-[16px] border border-white/10 bg-black/20 backdrop-blur p-1 max-h-64 overflow-auto">
+                  {suggests.map((s, i) => (
+                    <button
+                      key={i}
+                      className="block w-full text-left px-3 py-2 rounded-lg hover:bg-white/10"
+                      onClick={() => {
+                        setAddr(s.label);
+                        setSuggests([]);
+                        setLat(s.lat);
+                        setLng(s.lng);
+                        // μόλις επιλέξει διεύθυνση → άμεση αναζήτηση 1500m
+                        onSearch({ lat: s.lat, lng: s.lng, radius: 1500, mode });
+                      }}
+                    >
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              <p className="text-xs text-white/60">* γράψε τη διεύθυνση και διάλεξε από τις προτάσεις</p>
             </div>
           )}
 
           <div className="mt-3">
+            {/* --- Κουμπί Αναζήτησης --- */}
             <Button
-              className="w-full rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/10"
-              onClick={() => onSearch({ lat, lng, radius, mode })}
+              className="w-full rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/10 mt-4"
+              onClick={() => onSearch({ lat, lng, radius: scope === "addr" ? 1500 : radius, mode })}
             >
               Αναζήτηση
             </Button>
