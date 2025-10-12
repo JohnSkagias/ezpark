@@ -116,41 +116,224 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
 }
 
 /* ezpark map popup */
-.maplibregl-popup.ezpopup .maplibregl-popup-content{
-  background: rgba(17,17,17,0.7); /* ~70% opacity */
+.maplibregl-popup.ezpopup .maplibregl-popup-content {
+  background: rgba(17, 17, 17, 0.7);
   color: #fff;
   border-radius: 14px;
   padding: 10px 12px;
-  box-shadow: 0 10px 30px rgba(0,0,0,.35);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .35);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   animation: ezpop-in 180ms ease-out;
 }
-.maplibregl-popup.ezpopup .maplibregl-popup-tip{
-  border-top-color: rgba(17,17,17,0.7);
-  border-bottom-color: rgba(17,17,17,0.7);
+
+.maplibregl-popup.ezpopup .maplibregl-popup-tip {
+  border-top-color: rgba(17, 17, 17, 0.7);
+  border-bottom-color: rgba(17, 17, 17, 0.7);
 }
 
-/* εμφάνιση του link σαν κουμπί */
-.ezpopup-btn{
-  display:inline-block;
-  padding:6px 10px;
+.ezpopup-btn {
+  display: inline-block;
+  padding: 6px 10px;
   border-radius: 10px;
-  background:#1a73e8;
-  color:#fff;
-  text-decoration:none;
-  font-size:12px;
-  font-weight:600;
+  background: #1a73e8;
+  color: #fff;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 600;
 }
 
-/* animation */
-@keyframes ezpop-in{
-  from{ transform: translateY(6px); opacity: 0; }
-  to  { transform: translateY(0);   opacity: 1; }
+@keyframes ezpop-in {
+  from {
+    transform: translateY(6px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ==== Pretty range slider (dynamic left color) ==== */
+.range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 10px;
+  border-radius: 9999px;
+  background: linear-gradient(to right,
+      var(--left, #22c55e) var(--fill, 0%),
+      rgba(255, 255, 255, 0.25) var(--fill, 0%));
+  outline: none;
+  transition: background 120ms ease;
+}
+
+/* Track (Firefox) */
+.range::-moz-range-track {
+  height: 10px;
+  border-radius: 9999px;
+  background: transparent;
+}
+
+/* === Pulse animation (breathing) === */
+@keyframes pulseRing {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: .6;
+  }
+
+  50% {
+    transform: translate(-50%, -50%) scale(1.4);
+    opacity: .2;
+  }
+
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: .6;
+  }
+}
+
+/* ===== WebKit (Chrome/Edge/Safari) ===== */
+.range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 9999px;
+  background: #fff;
+  border: 3px solid #22c55e;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .35);
+  cursor: pointer;
+  transition: transform 120ms ease;
+  position: relative;
+  z-index: 2;
+}
+
+.range::-webkit-slider-thumb::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 22px;
+  height: 22px;
+  border-radius: 9999px;
+  background: rgba(34, 197, 94, .35);
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 0;
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+
+.range::-webkit-slider-thumb:hover,
+.range::-webkit-slider-thumb:active {
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, .35),
+    0 0 0 6px rgba(34, 197, 94, .22);
+}
+
+.range::-webkit-slider-thumb:hover::after,
+.range::-webkit-slider-thumb:active::after {
+  opacity: 1;
+  animation: pulseRing 1.2s ease-in-out infinite;
+}
+
+/* ===== Firefox ===== */
+.range::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 9999px;
+  background: #fff;
+  border: 3px solid #22c55e;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .35);
+  cursor: pointer;
+  position: relative;
+  z-index: 2;
+}
+
+.range::-moz-range-thumb::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 22px;
+  height: 22px;
+  border-radius: 9999px;
+  background: rgba(34, 197, 94, .35);
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 0;
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+
+.range::-moz-range-thumb:hover,
+.range::-moz-range-thumb:active {
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, .35),
+    0 0 0 6px rgba(34, 197, 94, .22);
+}
+
+.range::-moz-range-thumb:hover::after,
+.range::-moz-range-thumb:active::after {
+  opacity: 1;
+  animation: pulseRing 1.2s ease-in-out infinite;
+}
+
+/* Focus ring για το input */
+.range:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.25);
+  border-radius: 9999px;
+}
+/* Dark-friendly native select */
+.native-select-dark {
+  color: #fff;
+  /* στο κλειστό select */
+  background: rgba(255, 255, 255, .05);
+  border: 1px solid rgba(255, 255, 255, .1);
+  border-radius: 16px;
+}
+
+/* όταν ανοίγει το menu των επιλογών */
+.native-select-dark option {
+  color: #111;
+  /* σκούρο κείμενο πάνω σε λευκό menu */
+  background: #fff;
+  /* προαιρετικό: καθαρό λευκό */
+}
+
+/* disabled option style (αν έχεις placeholders) */
+.native-select-dark option:disabled {
+  color: rgba(0, 0, 0, .45);
+}
+
+/* Dark-friendly native select */
+.native-select-dark {
+  color: #fff;
+  background: rgba(30, 30, 30, 0.95);
+  border: 1px solid rgba(255, 255, 255, .15);
+  border-radius: 12px;
+  padding: 0.5rem 0.75rem;
+}
+
+.native-select-dark option {
+  background: #1c1c1c;
+  color: #fff;
+}
+
+.native-select-dark option:checked {
+  background: #2d6a4f;
+  color: #fff;
+}
+
+.native-select-dark option:hover {
+  background: #333;
+  color: #fff;
 }
