@@ -14,15 +14,23 @@ export default function HomePage() {
       .format(d)
       .replace(/^./, (c) => c.toUpperCase());
 
+  const [activeWeekday, setActiveWeekday] = useState<number | undefined>(undefined);
+  const dayNames = ["", "Δευτέρα", "Τρίτη", "Τετάρτη", "Πέμπτη", "Παρασκευή", "Σάββατο", "Κυριακή"];
+
   const runSearch = async ({
-    lat, lng, radius, mode,
-  }: { lat: number; lng: number; radius: number; mode: "night" | "long" }) => {
-    const res = await fetch(`/api/search?lat=${lat}&lng=${lng}&radius=${radius}&mode=${mode}`);
+    lat, lng, radius, mode, weekday,
+  }: { lat: number; lng: number; radius: number; mode: "night" | "long"; weekday?: number }) => {
+    const params = new URLSearchParams({ lat: String(lat), lng: String(lng), radius: String(radius), mode });
+    if (typeof weekday === "number" && weekday >= 1 && weekday <= 7) params.set("weekday", String(weekday));
+
+    const res = await fetch(`/api/search?${params.toString()}`, { cache: "no-store" });
     const json = await res.json();
     setData(json.geojson);
     setSuggested(json.suggestedWindow);
-    setLabel(`σήμερα ${dayNameGR(new Date())}`);
+    setActiveWeekday(weekday); // <- κρατάμε την επιλογή για τον τίτλο
+    if (!weekday) setLabel(`σήμερα ${dayNameGR(new Date())}`);
   };
+
 
   useEffect(() => { runSearch({ lat: 37.979, lng: 23.7265, radius: 2000, mode: "night" }); }, []);
 
@@ -52,7 +60,10 @@ export default function HomePage() {
       {/* Right panel */}
       <div className="space-y-5">
         <h2 className="text-xl font-semibold text-white/90">
-          Προτεινόμενοι Οδοί για <span className="text-emerald-400">{label}</span>
+          Προτεινόμενοι Οδοί για{" "}
+          <span className="text-emerald-400">
+            {activeWeekday ? dayNames[activeWeekday] : `σήμερα ${dayNameGR(new Date())}`}
+          </span>
         </h2>
 
         {/* Map card */}

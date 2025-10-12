@@ -27,10 +27,23 @@ export async function GET(req: Request) {
   const radius = Number(searchParams.get("radius") ?? "2000");
   const mode = (searchParams.get("mode") ?? "night") as "night" | "long";
 
+  // ---- weekday parsing
+  const weekdayParam = searchParams.get("weekday");
+  let weekdayOverride: number | undefined;
+  if (weekdayParam !== null) {
+    const n = Number(weekdayParam);
+    if (!Number.isNaN(n) && n >= 1 && n <= 7) weekdayOverride = n; // 1..7
+  }
+
   const now = new Date();
-  const todayIso = isoDay(now.getDay());
+  const todayIso = isoDay(now.getDay());          // 1..7
   const tomorrowIso = todayIso === 7 ? 1 : todayIso + 1;
-  const targetIso = mode === "night" ? tomorrowIso : todayIso;
+  const nextIso = (d: number) => (d === 7 ? 1 : d + 1);
+
+  const targetIso: number =
+    typeof weekdayOverride === "number"
+      ? (mode === "night" ? nextIso(weekdayOverride) : weekdayOverride)
+      : (mode === "night" ? tomorrowIso : todayIso);
 
   const rows = await prisma.$queryRaw<Row[]>`
     with center as (
@@ -84,4 +97,12 @@ export async function GET(req: Request) {
   return new Response(safeStringify(payload), {
     headers: { "content-type": "application/json" },
   });
+
 }
+
+
+const now = new Date();
+const todayIso = isoDay(now.getDay());          // 1..7
+const tomorrowIso = todayIso === 7 ? 1 : todayIso + 1;
+
+
