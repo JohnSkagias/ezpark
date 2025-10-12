@@ -8,16 +8,21 @@ type MapProps = { geojson?: GeoJSON.FeatureCollection; center?: [number, number]
 function toPins(fc: GeoJSON.FeatureCollection): GeoJSON.FeatureCollection {
   const pts: GeoJSON.Feature[] = [];
   for (const f of fc.features) {
-    if (f.geometry?.type === "LineString") {
-      const coords = (f.geometry.coordinates as number[][]) || [];
+    if (!f.geometry) continue;
+    if (f.geometry.type === "LineString") {
+      const coords = f.geometry.coordinates as number[][];
       if (coords.length >= 2) {
         const mid = coords[Math.floor(coords.length / 2)];
         pts.push({ type: "Feature", geometry: { type: "Point", coordinates: mid }, properties: f.properties });
       }
+    } else if (f.geometry.type === "Point") {
+      // αν ήδη είναι point, χρησιμοποίησέ το όπως είναι
+      pts.push(f);
     }
   }
   return { type: "FeatureCollection", features: pts };
 }
+
 
 function boundsOfCoords(coords: number[][]) {
   let minLng = 180, minLat = 90, maxLng = -180, maxLat = -90;

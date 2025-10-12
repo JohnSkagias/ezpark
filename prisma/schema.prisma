@@ -39,3 +39,19 @@ model Market {
 
   @@map("markets")
 }
+
+model EzparkData {
+  id              BigInt   @id @map("id")            // int8
+  area_name       String?  @map("area_name")
+  municipality    String?  @map("municipality")
+  road_name       String?  @map("road_name")
+  weekday_iso     Int?     @map("weekday_iso") @db.SmallInt
+  season_start    String?  @map("season_start")
+  season_end      String?  @map("season_end")
+  permanent       Boolean? @map("permanent")
+  source_day_label String? @map("source_day_label")
+  latitude        Float?   @map("latitude")  @db.DoublePrecision
+  longitude       Float?   @map("longitude") @db.DoublePrecision
+
+  @@map("ezpark_data")
+}

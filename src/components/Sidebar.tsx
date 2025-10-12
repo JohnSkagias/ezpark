@@ -89,7 +89,7 @@ export default function Sidebar({ onSearch }: Props) {
 
               {/* Dropdown προτάσεων */}
               {suggests.length > 0 && (
-                <div className="absolute z-20 mt-1 w-full rounded-xl border border-white/10 bg-black/40 backdrop-blur p-1 max-h-64 overflow-auto">
+                <div className="absolute z-20 mt-1 w-full rounded-xl border border-white/10 bg-black/30 backdrop-blur p-1 max-h-64 overflow-auto">
                   {suggests.map((s, i) => (
                     <button
                       key={i}
