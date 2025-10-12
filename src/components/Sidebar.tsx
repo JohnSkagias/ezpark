@@ -13,7 +13,7 @@ export default function Sidebar({ onSearch }: Props) {
   const [scope, setScope] = useState<"all" | "addr">("all");
 
   const [addr, setAddr] = useState("");
-  const [suggests, setSuggests] = useState<{ label: string; lat: number; lng: number }[]>([]);
+  const [suggests, setSuggests] = useState<{ primary: string; secondary?: string; lat: number; lng: number }[]>([]);
   const [lat, setLat] = useState(37.979);
   const [lng, setLng] = useState(23.7265);
   const [radius, setRadius] = useState(20000); // Το radius μεσα στο οποιο θα γινεται η αναζητηση
@@ -89,25 +89,27 @@ export default function Sidebar({ onSearch }: Props) {
 
               {/* Dropdown προτάσεων */}
               {suggests.length > 0 && (
-                <div className="absolute z-20 mt-1 w-full rounded-[16px] border border-white/10 bg-black/20 backdrop-blur p-1 max-h-64 overflow-auto">
+                <div className="absolute z-20 mt-1 w-full rounded-xl border border-white/10 bg-black/40 backdrop-blur p-1 max-h-64 overflow-auto">
                   {suggests.map((s, i) => (
                     <button
                       key={i}
                       className="block w-full text-left px-3 py-2 rounded-lg hover:bg-white/10"
                       onClick={() => {
-                        setAddr(s.label);
+                        const label = s.secondary ? `${s.primary}, ${s.secondary}` : s.primary;
+                        setAddr(label);
                         setSuggests([]);
                         setLat(s.lat);
                         setLng(s.lng);
-                        // μόλις επιλέξει διεύθυνση → άμεση αναζήτηση 1500m
                         onSearch({ lat: s.lat, lng: s.lng, radius: 1500, mode });
                       }}
                     >
-                      {s.label}
+                      <div className="font-medium">{s.primary}</div>
+                      {s.secondary && <div className="text-xs text-white/60">{s.secondary}</div>}
                     </button>
                   ))}
                 </div>
               )}
+
 
               <p className="text-xs text-white/60">* γράψε τη διεύθυνση και διάλεξε από τις προτάσεις</p>
             </div>
