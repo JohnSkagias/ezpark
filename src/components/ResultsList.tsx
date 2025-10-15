@@ -3,7 +3,7 @@ type Props = { features: GeoJSON.Feature[] };
 export default function ResultsList({ features }: Props) {
   return (
     <div className="space-y-3">
-      <h2 className="text-lg font-semibold">Αποτελέσματα</h2>
+      {/* <h2 className="text-lg font-semibold">Αποτελέσματα</h2> */}
 
       <div className="flex flex-col gap-3">
         {features.map((f, i) => {

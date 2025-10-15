@@ -79,6 +79,10 @@ export default function HomePage() {
           </div>
         )}
 
+
+        <h3 className="text-lg font-semibold text-white/90">
+          Αποτελέσματα ({data.features.length})
+        </h3>
         {/* Full-width list (ίδιο πλάτος με τον χάρτη) */}
         <ResultsList features={data.features} />
       </div>
