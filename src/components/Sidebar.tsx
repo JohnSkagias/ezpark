@@ -102,7 +102,7 @@ export default function Sidebar({ onSearch }: Props) {
               <Input
                 value={addr}
                 onChange={(e) => setAddr(e.target.value)}
-                placeholder="π.χ. Δωδεκανήσου 39 Πειραιάς"
+                placeholder="π.χ. Πραξιτέλους Πειραιάς"
                 className="bg-white/5 border-white/10 text-white placeholder:text-white/60"
               />
 

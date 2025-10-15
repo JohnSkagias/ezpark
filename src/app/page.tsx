@@ -38,16 +38,17 @@ export default function HomePage() {
     <main className="grid grid-cols-1 lg:grid-cols-[33vw_1fr] min-h-screen gap-6 lg:gap-10 p-4 lg:p-8">
       {/* Floating Sidebar (sticky, full height, 60px radius) */}
       <div className="relative">
-        <div className="sticky top-6 self-start">
+        {/* sticky μόνο σε desktop */}
+        <div className="lg:sticky lg:top-6">
           <div
             className="
-              rounded-[46px]
-              border border-white/30
-              overflow-hidden
-              p-10 lg:p-12
-              min-h-[calc(98vh-3rem)]   /* γεμίζει σχεδόν όλο το ύψος */
-              bg-no-repeat bg-cover bg-center
-            "
+        rounded-3xl lg:rounded-[46px]
+        border border-white/30
+        overflow-hidden
+        p-6 lg:p-12
+        h-auto lg:min-h-[calc(98vh-3rem)]   /* mobile: auto, desktop: σχεδόν full height */
+        bg-no-repeat bg-cover bg-center
+      "
             style={{ backgroundImage: "url('/sidebarBackground.svg')" }}
           >
             <Sidebar onSearch={runSearch} />
