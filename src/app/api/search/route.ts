@@ -21,9 +21,11 @@ function isoDay(js: number) {
 }
 const nextIso = (d: number) => (d === 7 ? 1 : d + 1);
 
-// BigInt-safe stringify
-function safeStringify(obj: any) {
-  return JSON.stringify(obj, (_, v) => (typeof v === "bigint" ? v.toString() : v));
+
+function safeStringify(obj: unknown) {
+  return JSON.stringify(obj, (_, v) =>
+    typeof v === "bigint" ? v.toString() : v
+  );
 }
 
 // season parsing: "YYYY/MM/DD" -> {m,d}  (αγνοούμε το έτος)
