@@ -66,7 +66,7 @@ export default function Sidebar({ onSearch }: Props) {
       <div className="flex flex-col h-full justify-between">
         <div className="space-y-4">
           <div className="flex items-center justify-center">
-            <img src="/ezparkTitle.svg" alt="ezpark.gr" className="h-26 w-auto" />
+            <img src="/ezparkTitle. " alt="ezpark.gr" className="h-26 w-auto" />
           </div>
 
           {/* Mode segmented */}
