@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+export const runtime = 'nodejs';
+export const dynamic = "force-dynamic";
 
 const ATTICA_VIEWBOX = {
   // περίπου: (left, top, right, bottom)  => (lng_min, lat_max, lng_max, lat_min)
