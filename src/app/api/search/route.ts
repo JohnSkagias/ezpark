@@ -1,5 +1,6 @@
 // app/api/search/route.ts
 import { prisma } from "../../../../lib/prisma";
+export const runtime = 'nodejs';
 
 // ----- helpers -----
 type Row = {
