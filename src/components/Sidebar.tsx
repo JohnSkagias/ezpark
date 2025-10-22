@@ -128,7 +128,7 @@ export default function Sidebar({ onSearch }: Props) {
                 </div>
               )}
 
-              <p className="text-xs text-white/60">* γράψε τη διεύθυνση και διάλεξε από τις προτάσεις</p>
+              <p className="text-xs text-white/60">* γράψε διεύθυνση, περιοχή, μαγαζί κτλπ</p>
             </div>
           )}
 
