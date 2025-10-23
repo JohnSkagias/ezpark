@@ -32,7 +32,7 @@ export default function HomePage() {
   };
 
 
-  useEffect(() => { runSearch({ lat: 37.979, lng: 23.7265, radius: 2000, mode: "night" }); }, []);
+  useEffect(() => { runSearch({ lat: 37.979, lng: 23.7265, radius: 200000, mode: "night" }); }, []);
 
   return (
     <main className="grid grid-cols-1 lg:grid-cols-[33vw_1fr] min-h-screen gap-6 lg:gap-10 p-4 lg:p-8">
