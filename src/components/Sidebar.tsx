@@ -68,18 +68,8 @@ export default function Sidebar({ onSearch, onWave }: Props) {
   ];
 
 
-  // helper για darken (ή βάλε κατευθείαν fixed χρώματα)
-  const darken = (hex: string, amt = -10) => {
-    const clamp = (n: number) => Math.min(255, Math.max(0, n));
-    const c = hex.replace('#', '');
-    const r = clamp(parseInt(c.substring(0, 2), 16) + amt);
-    const g = clamp(parseInt(c.substring(2, 4), 16) + amt);
-    const b = clamp(parseInt(c.substring(4, 6), 16) + amt);
-    return `rgb(${r}, ${g}, ${b})`;
-  };
-
-  const ACTIVE = "#5dd14baf";             // πράσινο
-  const ACTIVE_HOVER = darken("458841", -12);  // λίγο πιο σκούρο
+  const [hovered, setHovered] = useState<"night" | "long" | null>(null);
+  const ACTIVE = "#5dd14bc3";
 
 
   return (
@@ -92,64 +82,61 @@ export default function Sidebar({ onSearch, onWave }: Props) {
 
           {/* Mode segmented */}
           <div className="relative rounded-full bg-white/10 p-2 mt-[clamp(1.5rem,6vh,5rem)] overflow-hidden">
-            {/* slider πίσω από τα κουμπιά */}
+            {/* Slider πίσω από τα κουμπιά */}
             <motion.div
               aria-hidden
-              layout
-              transition={{ type: "spring", stiffness: 500, damping: 40 }}
-              className="absolute inset-y-2 left-2 rounded-full"
+              className="absolute inset-y-2 left-2 rounded-full transition-[box-shadow,filter] duration-300 ease-in-out"
               style={{
                 width: "calc(50% - 0.5rem)",
-                backgroundColor: mode === "night" ? ACTIVE : "#5dd14baf",
-                transform: mode === "night" ? "translateX(0%)" : "translateX(100%)",
-                boxShadow: mode === "night" ? "inset 0 0 0 1px rgba(255,255,255,.12), 0 8px 20px rgba(69,136,65,.28)" : "none",
-                transition: "background-color 180ms ease, transform 300ms cubic-bezier(.2,.8,.2,1), box-shadow 180ms ease",
+                backgroundColor: ACTIVE, // #5dd14baf
+                boxShadow:
+                  hovered === mode
+                    ? "0 10px 28px rgba(93,209,75,.32), 0 0 22px rgba(93,209,75,.34)"
+                    : "0 8px 20px rgba(93,209,75,.22), 0 0 14px rgba(93,209,75,.20)",
+                filter: hovered === mode ? "brightness(0.94)" : "none",
+                willChange: "transform",
               }}
-              // hover darken ΜΟΝΟ όταν είμαστε στο active segment
-              onMouseEnter={e => {
-                if (mode === "night") (e.currentTarget as HTMLDivElement).style.backgroundColor = ACTIVE_HOVER;
-              }}
-              onMouseLeave={e => {
-                if (mode === "night") (e.currentTarget as HTMLDivElement).style.backgroundColor = ACTIVE;
+              animate={{ x: mode === "night" ? 0 : "100%" }}
+              transition={{
+                type: "spring",
+                stiffness: 520,
+                damping: 22,
+                mass: 0.9,
+                bounce: 0.35,
               }}
             />
 
+
+
             <div className="relative grid grid-cols-2 gap-0">
-              {/* Left button */}
+              {/* Left */}
               <motion.button
+                onHoverStart={() => setHovered("night")}
+                onHoverEnd={() => setHovered(null)}
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 onClick={() => handleMode("night")}
                 className={[
-                  "z-10 px-4 py-3 text-sm font-medium rounded-full transition-colors",
+                  "z-10 px-4 py-3 text-sm font-medium rounded-full",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/60",
                   mode === "night" ? "text-white" : "text-white/85 hover:text-white",
                 ].join(" ")}
-                style={{
-                  // έξτρα εσωτερικό glow όταν είναι ενεργό
-                  boxShadow:
-                    mode === "night"
-                      ? "inset 0 0 0 1px rgba(255, 255, 255, 0.1)"
-                      : "none",
-                }}
               >
                 Βραδινή Έξοδος
               </motion.button>
 
-              {/* Right button */}
+              {/* Right */}
               <motion.button
+                onHoverStart={() => setHovered("long")}
+                onHoverEnd={() => setHovered(null)}
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 onClick={() => handleMode("long")}
                 className={[
-                  "z-10 px-4 py-3 text-sm font-medium rounded-full transition-colors",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/40",
+                  "z-10 px-4 py-3 text-sm font-medium rounded-full",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/60",
                   mode === "long" ? "text-white" : "text-white/85 hover:text-white",
                 ].join(" ")}
-                style={{
-                  // αν θέλεις και για το δεξί όταν είναι active βάλε αντίστοιχο χρώμα εδώ
-                  // π.χ. μπλε slider: αλλάζει στο style του slider πιο πάνω
-                }}
               >
                 Μόνιμη Στάθμευση
               </motion.button>
@@ -157,15 +144,87 @@ export default function Sidebar({ onSearch, onWave }: Props) {
           </div>
 
           {/* Scope segmented */}
-          <div className="relative rounded-full bg-white/10 p-2 overflow-hidden">
-            <div aria-hidden className="absolute inset-y-2 left-2 rounded-full transition-transform duration-300"
+          <div className="relative rounded-full bg-white/10 p-2 overflow-hidden mt-3">
+            {/* slider πίσω από τα κουμπιά */}
+            <motion.div
+              aria-hidden
+              className="absolute inset-y-2 left-2 rounded-full transition-[box-shadow,filter] duration-300 ease-in-out"
               style={{
-                width: 'calc(50% - 0.5rem)', backgroundColor: '#446ab0ff',
-                transform: scope === "all" ? "translateX(0%)" : "translateX(100%)"
-              }} />
+                width: "calc(50% - 0.5rem)",
+                backgroundColor: "#446ab0ff",
+                boxShadow:
+                  // μόνιμο ελαφρύ glow στο ενεργό + θα γίνει πιο δυνατό όταν hoverάρεις το ενεργό button
+                  (/* θα δυναμώσει με hover από το state των buttons παρακάτω */ "0 8px 20px rgba(68, 106, 176, 0.3), 0 0 14px rgba(68, 106, 176, 0.4)"),
+                willChange: "transform",
+              }}
+              // springy slide (bounce) όπως πάνω
+              animate={{ x: scope === "all" ? 0 : "100%" }}
+              transition={{ type: "spring", stiffness: 520, damping: 22, mass: 0.9, bounce: 0.35 }}
+            />
+
             <div className="relative grid grid-cols-2">
-              <button onClick={() => setScope("all")} className="z-10 px-4 py-3 text-sm font-medium text-white">Όλα</button>
-              <button onClick={() => setScope("addr")} className="z-10 px-4 py-3 text-sm font-medium text-white">Συγκεκριμένη Διεύθυνση</button>
+              {/* Left: Όλα */}
+              <motion.button
+                onHoverStart={() => {
+                  if (scope === "all") {
+                    // ενισχύουμε προσωρινά το glow του slider όταν hoverάρεις το ενεργό
+                    const s = (document?.currentScript as any)?.ownerDocument ?? document;
+                    const el = (s.querySelector?.(":scope") ? (null as any) : null); // no-op για TS
+                  }
+                }}
+                onMouseEnter={(e) => {
+                  if (scope === "all") {
+                    const slider = (e.currentTarget.parentElement!.previousElementSibling as HTMLDivElement);
+                    slider.style.boxShadow = "0 10px 28px rgba(68,106,176,.30), 0 0 22px rgba(68,106,176,.34)";
+                    slider.style.filter = "brightness(0.94)";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (scope === "all") {
+                    const slider = (e.currentTarget.parentElement!.previousElementSibling as HTMLDivElement);
+                    slider.style.boxShadow = "0 8px 20px rgba(68,106,176,.22), 0 0 14px rgba(68,106,176,.20)";
+                    slider.style.filter = "none";
+                  }
+                }}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => setScope("all")}
+                className={[
+                  "z-10 px-4 py-3 text-sm font-medium rounded-full",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300/60",
+                  scope === "all" ? "text-white" : "text-white/85 hover:text-white",
+                ].join(" ")}
+              >
+                Όλα
+              </motion.button>
+
+              {/* Right: Συγκεκριμένη Διεύθυνση */}
+              <motion.button
+                onMouseEnter={(e) => {
+                  if (scope === "addr") {
+                    const slider = (e.currentTarget.parentElement!.previousElementSibling as HTMLDivElement);
+                    slider.style.boxShadow = "0 10px 28px rgba(68,106,176,.30), 0 0 22px rgba(68,106,176,.34)";
+                    slider.style.filter = "brightness(0.94)";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (scope === "addr") {
+                    const slider = (e.currentTarget.parentElement!.previousElementSibling as HTMLDivElement);
+                    slider.style.boxShadow = "0 8px 20px rgba(68,106,176,.22), 0 0 14px rgba(68,106,176,.20)";
+                    slider.style.filter = "none";
+                  }
+                }}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => setScope("addr")}
+                className={[
+                  "z-10 px-4 py-3 text-sm font-medium rounded-full",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300/60",
+                  scope === "addr" ? "text-white" : "text-white/85 hover:text-white",
+                ].join(" ")}
+              >
+                Συγκεκριμένη Διεύθυνση
+              </motion.button>
             </div>
           </div>
 
@@ -201,7 +260,7 @@ export default function Sidebar({ onSearch, onWave }: Props) {
                 </div>
               )}
 
-              <p className="text-xs text-white/60">* γράψε διεύθυνση, περιοχή, μαγαζί κτλπ</p>
+              <p className="text-xs text-white/60">* Γράψε διεύθυνση, περιοχή, μαγαζί κτλπ</p>
             </div>
           )}
 
