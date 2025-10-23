@@ -6,6 +6,8 @@ import { Button } from "./ui/button"; //δεν χρησιμοποιείται π
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import SearchWaveButton from "@/components/ui/SearchWaveButton";
+import { motion } from "framer-motion";
+
 
 type Props = {
   onSearch: (p: { lat: number; lng: number; radius: number; mode: "night" | "long"; weekday?: number }) => void;
@@ -66,6 +68,20 @@ export default function Sidebar({ onSearch, onWave }: Props) {
   ];
 
 
+  // helper για darken (ή βάλε κατευθείαν fixed χρώματα)
+  const darken = (hex: string, amt = -10) => {
+    const clamp = (n: number) => Math.min(255, Math.max(0, n));
+    const c = hex.replace('#', '');
+    const r = clamp(parseInt(c.substring(0, 2), 16) + amt);
+    const g = clamp(parseInt(c.substring(2, 4), 16) + amt);
+    const b = clamp(parseInt(c.substring(4, 6), 16) + amt);
+    return `rgb(${r}, ${g}, ${b})`;
+  };
+
+  const ACTIVE = "#5dd14baf";             // πράσινο
+  const ACTIVE_HOVER = darken("458841", -12);  // λίγο πιο σκούρο
+
+
   return (
     <aside className="h-full p-5 text-white">
       <div className="flex flex-col h-full justify-between">
@@ -76,15 +92,67 @@ export default function Sidebar({ onSearch, onWave }: Props) {
 
           {/* Mode segmented */}
           <div className="relative rounded-full bg-white/10 p-2 mt-[clamp(1.5rem,6vh,5rem)] overflow-hidden">
-            <div aria-hidden className="absolute inset-y-2 left-2 rounded-full transition-transform duration-300"
+            {/* slider πίσω από τα κουμπιά */}
+            <motion.div
+              aria-hidden
+              layout
+              transition={{ type: "spring", stiffness: 500, damping: 40 }}
+              className="absolute inset-y-2 left-2 rounded-full"
               style={{
-                width: 'calc(50% - 0.5rem)', backgroundColor: '#458841',
-                transform: mode === "night" ? "translateX(0%)" : "translateX(100%)"
-              }} />
-            <div className="relative grid grid-cols-2">
-              <button onClick={() => handleMode("night")} className="z-10 px-4 py-3 text-sm font-medium text-white">Βραδινή Έξοδος</button>
-              <button onClick={() => handleMode("long")} className="z-10 px-4 py-3 text-sm font-medium text-white">Μόνιμη Στάθμευση</button>
+                width: "calc(50% - 0.5rem)",
+                backgroundColor: mode === "night" ? ACTIVE : "#5dd14baf",
+                transform: mode === "night" ? "translateX(0%)" : "translateX(100%)",
+                boxShadow: mode === "night" ? "inset 0 0 0 1px rgba(255,255,255,.12), 0 8px 20px rgba(69,136,65,.28)" : "none",
+                transition: "background-color 180ms ease, transform 300ms cubic-bezier(.2,.8,.2,1), box-shadow 180ms ease",
+              }}
+              // hover darken ΜΟΝΟ όταν είμαστε στο active segment
+              onMouseEnter={e => {
+                if (mode === "night") (e.currentTarget as HTMLDivElement).style.backgroundColor = ACTIVE_HOVER;
+              }}
+              onMouseLeave={e => {
+                if (mode === "night") (e.currentTarget as HTMLDivElement).style.backgroundColor = ACTIVE;
+              }}
+            />
 
+            <div className="relative grid grid-cols-2 gap-0">
+              {/* Left button */}
+              <motion.button
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => handleMode("night")}
+                className={[
+                  "z-10 px-4 py-3 text-sm font-medium rounded-full transition-colors",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/60",
+                  mode === "night" ? "text-white" : "text-white/85 hover:text-white",
+                ].join(" ")}
+                style={{
+                  // έξτρα εσωτερικό glow όταν είναι ενεργό
+                  boxShadow:
+                    mode === "night"
+                      ? "inset 0 0 0 1px rgba(255, 255, 255, 0.1)"
+                      : "none",
+                }}
+              >
+                Βραδινή Έξοδος
+              </motion.button>
+
+              {/* Right button */}
+              <motion.button
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => handleMode("long")}
+                className={[
+                  "z-10 px-4 py-3 text-sm font-medium rounded-full transition-colors",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/40",
+                  mode === "long" ? "text-white" : "text-white/85 hover:text-white",
+                ].join(" ")}
+                style={{
+                  // αν θέλεις και για το δεξί όταν είναι active βάλε αντίστοιχο χρώμα εδώ
+                  // π.χ. μπλε slider: αλλάζει στο style του slider πιο πάνω
+                }}
+              >
+                Μόνιμη Στάθμευση
+              </motion.button>
             </div>
           </div>
 
@@ -92,7 +160,7 @@ export default function Sidebar({ onSearch, onWave }: Props) {
           <div className="relative rounded-full bg-white/10 p-2 overflow-hidden">
             <div aria-hidden className="absolute inset-y-2 left-2 rounded-full transition-transform duration-300"
               style={{
-                width: 'calc(50% - 0.5rem)', backgroundColor: '#415A88',
+                width: 'calc(50% - 0.5rem)', backgroundColor: '#446ab0ff',
                 transform: scope === "all" ? "translateX(0%)" : "translateX(100%)"
               }} />
             <div className="relative grid grid-cols-2">
