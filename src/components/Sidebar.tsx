@@ -1,14 +1,19 @@
+// Sidebar.tsx
+
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { Button } from "./ui/button";
+import { Button } from "./ui/button"; //δεν χρησιμοποιείται πλεον
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
+import SearchWaveButton from "@/components/ui/SearchWaveButton";
 
 type Props = {
   onSearch: (p: { lat: number; lng: number; radius: number; mode: "night" | "long"; weekday?: number }) => void;
+  onWave?: () => void;
 };
 
-export default function Sidebar({ onSearch }: Props) {
+
+export default function Sidebar({ onSearch, onWave }: Props) {
   const [mode, setMode] = useState<"night" | "long">("night");
   const [scope, setScope] = useState<"all" | "addr">("all");
 
@@ -134,20 +139,13 @@ export default function Sidebar({ onSearch }: Props) {
 
           {/* Αναζήτηση */}
           <div className="mt-3">
-            <Button
-              className="w-full rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/10 mt-4"
-              onClick={() =>
-                onSearch({
-                  lat, lng,
-                  radius: scope === "addr" ? (advRadius || 1000) : radius,
-                  mode,
-                  weekday: advDay,
-                })
-              }
-            >
-              Αναζήτηση
-            </Button>
+            <SearchWaveButton
+              className="mt-4"
+              onClick={() => onSearch({ lat, lng, radius: scope === "addr" ? (advRadius || 1000) : radius, mode, weekday: advDay })}
+              onWaveDone={onWave}
+            />
           </div>
+
 
           <div className="mt-4 flex items-center gap-3">
             <button
@@ -236,6 +234,6 @@ export default function Sidebar({ onSearch }: Props) {
           </div>
         )}
       </div>
-    </aside>
+    </aside >
   );
 }
