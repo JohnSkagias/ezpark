@@ -99,8 +99,8 @@ export default function Sidebar({ onSearch, onWave }: Props) {
               animate={{ x: mode === "night" ? 0 : "100%" }}
               transition={{
                 type: "spring",
-                stiffness: 520,
-                damping: 22,
+                stiffness: 320,
+                damping: 25,
                 mass: 0.9,
                 bounce: 0.35,
               }}
@@ -159,7 +159,13 @@ export default function Sidebar({ onSearch, onWave }: Props) {
               }}
               // springy slide (bounce) όπως πάνω
               animate={{ x: scope === "all" ? 0 : "100%" }}
-              transition={{ type: "spring", stiffness: 520, damping: 22, mass: 0.9, bounce: 0.35 }}
+              transition={{
+                type: "spring",
+                stiffness: 320,
+                damping: 25,
+                mass: 0.9,
+                bounce: 0.35,
+              }}
             />
 
             <div className="relative grid grid-cols-2">
