@@ -34,7 +34,7 @@ export default function SearchWaveButton({
     await controls.start({
       "--x": "160%",       // βγάζει πλήρως το band έξω δεξιά
       "--a": 1,            // ορατότητα band
-      transition: { duration, ease: [0.45, 0, 0.55, 1] },  // ease-in-out
+      transition: { duration, ease: [0.80, 0.40, 0.30, 0.1] },  // animation curve (slow in the start, fast in the end)
     });
 
     // γρήγορο σβήσιμο στο τέλος

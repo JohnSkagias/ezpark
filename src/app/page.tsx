@@ -54,7 +54,7 @@ export default function HomePage() {
             <Map geojson={data} />
           </div>
           {/* λεπτό, διακριτικό sweep πάνω στο border */}
-          <MapBorderSweep trigger={mapWave} radius={28} thickness={2} duration={0.65} fadeOutAfter={1.0} />
+          <MapBorderSweep trigger={mapWave} radius={28} thickness={2} duration={0.65} fadeOutAfter={0.5} />
         </div>
 
         {suggested && (
