@@ -47,18 +47,18 @@ export default function Sidebar({ onSearch, onWave }: Props) {
 
   const handleMode = (m: "night" | "long") => {
     setMode(m);
-    onSearch({ lat, lng, radius: scope === "addr" ? (advRadius || 1500) : radius, mode: m, weekday: advDay });
+    // onSearch({ lat, lng, radius: scope === "addr" ? (advRadius || 1500) : radius, mode: m, weekday: advDay });
   };
 
 
   const applyAdvanced = () => {
     setShowAdv(false);
-    onSearch({
-      lat, lng,
-      radius: scope === "addr" ? (advRadius || 1000) : radius,
-      mode,
-      weekday: advDay,
-    });
+    // onSearch({
+    //   lat, lng,
+    //   radius: scope === "addr" ? (advRadius || 1000) : radius,
+    //   mode,
+    //   weekday: advDay,
+    // });
   };
 
 
@@ -256,7 +256,7 @@ export default function Sidebar({ onSearch, onWave }: Props) {
                         setSuggests([]);
                         setLat(s.lat);
                         setLng(s.lng);
-                        onSearch({ lat: s.lat, lng: s.lng, radius: advRadius || 1000, mode, weekday: advDay });
+                        // onSearch({ lat: s.lat, lng: s.lng, radius: advRadius || 1000, mode, weekday: advDay });
                       }}
                     >
                       <div className="font-medium">{s.primary}</div>
