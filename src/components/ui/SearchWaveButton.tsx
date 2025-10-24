@@ -51,7 +51,7 @@ export default function SearchWaveButton({
       className={[
         "relative overflow-hidden rounded-full w-full px-6 py-3 font-medium",
         "bg-white/10 text-white border border-white/10 backdrop-blur",
-        "transition-shadow hover:shadow-[0_0_20px_rgba(255,255,255,.12)]",
+        "transition-shadow hover:shadow-[0_0_20px_rgba(255,255,255,.11)] duration-600 ease-[cubic-bezier(.22,1,.36,1)]",
         className || ""
       ].join(" ")}
       aria-label="Αναζήτηση"

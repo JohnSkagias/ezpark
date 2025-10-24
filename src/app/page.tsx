@@ -26,7 +26,7 @@ export default function HomePage() {
 
   useEffect(() => { runSearch({ lat: 37.979, lng: 23.7265, radius: 10000, mode: "night" }); }, []);
 
-  // trigger για το outline-animation
+  // state για το map border sweep / animation
   const [mapWave, setMapWave] = useState(false);
   const triggerMapWave = () => {
     setMapWave(false);
