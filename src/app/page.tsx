@@ -76,7 +76,7 @@ export default function HomePage() {
         )}
 
         <h3 className="text-lg font-semibold text-white/90">Αποτελέσματα ({data.features.length})</h3>
-        <ResultsList features={data.features} />
+        <ResultsList features={data.features ?? []} />
 
         <footer className="mt-10 py-6 text-center text-white/60 border-t border-white/10">
           <div className="text-xs">© 2025 EzPark. All rights reserved.</div>
