@@ -109,25 +109,50 @@ export default function Map({ geojson, center = [23.709115, 37.963455], zoom = 1
     });
 
     return () => { if (mapObj.current) { mapObj.current.remove(); mapObj.current = null; } };
-  }, [center, zoom, geojson]);
+  }, []);  //[center, zoom, geojson]
+
+  const lastBoundsRef = useRef<[[number, number], [number, number]] | null>(null);
+  const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!mapObj.current || !geojson) return;
 
-    const roadsSrc = mapObj.current.getSource("roads") as maplibregl.GeoJSONSource | undefined;
-    const pinsSrc = mapObj.current.getSource("road-pins") as maplibregl.GeoJSONSource | undefined;
+    const map = mapObj.current;
+    const roadsSrc = map.getSource("roads") as maplibregl.GeoJSONSource | undefined;
+    const pinsSrc = map.getSource("road-pins") as maplibregl.GeoJSONSource | undefined;
 
+    // 1) ενημέρωσε ΠΡΩΤΑ τα sources (ένα repaint)
     if (roadsSrc) roadsSrc.setData(geojson);
     if (pinsSrc) pinsSrc.setData(toPins(geojson));
 
+    // 2) υπολόγισε bounds & αν είναι ίδια με τα προηγούμενα, μην κάνεις τίποτα
     const b = boundsOfFeatureCollection(geojson);
-    if (b) {
-      mapObj.current.fitBounds(b, {
+    if (!b) return;
+
+    const sameBounds =
+      lastBoundsRef.current &&
+      lastBoundsRef.current[0][0] === b[0][0] &&
+      lastBoundsRef.current[0][1] === b[0][1] &&
+      lastBoundsRef.current[1][0] === b[1][0] &&
+      lastBoundsRef.current[1][1] === b[1][1];
+
+    if (sameBounds) return; // ⛔️ αποφυγή δεύτερου fit στο ίδιο extent
+
+    lastBoundsRef.current = b;
+
+    // 3) κάνε ΕΝΑ fitBounds στο επόμενο frame (ακυρώνουμε τυχόν προηγούμενο)
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(() => {
+      map.fitBounds(b, {
         padding: { top: 40, right: 40, bottom: 40, left: 40 },
         duration: 700,
-        maxZoom: 13, // μη ζουμάρει υπερβολικά
+        maxZoom: 14,
       });
-    }
+    });
+
+    return () => {
+      if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
+    };
   }, [geojson]);
 
 

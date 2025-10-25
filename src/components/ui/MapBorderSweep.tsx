@@ -18,7 +18,7 @@ export default function MapBorderSweep({
             // 2) Sweep αριστερά -> δεξιά (ίδιες τιμές με πριν)
             await ctrl.start({
                 "--pos": "140%",
-                transition: { duration, ease: [0.45, 0, 0.55, 1] },
+                transition: { duration, ease: [0.65, 0, 0.55, 1] },
             });
 
             // 3) Fade out (ίδιες τιμές)

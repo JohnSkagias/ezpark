@@ -282,7 +282,7 @@ export default function Sidebar({ onSearch, onWave }: Props) {
 
           <div className="mt-4 flex items-center gap-3">
             <button
-              className="text-left text-white/40 underline underline-offset-4"
+              className="text-left text-white/40 hover:text-white/50 underline underline-offset-4"
               onClick={() => setShowAdv(true)}
             >
               Σύνθετες Επιλογές

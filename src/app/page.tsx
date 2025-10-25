@@ -12,9 +12,12 @@ export default function HomePage() {
   const dayNameGR = (d: Date) => new Intl.DateTimeFormat("el-GR", { weekday: "long" }).format(d).replace(/^./, (c) => c.toUpperCase());
   const dayNames = ["", "Δευτέρα", "Τρίτη", "Τετάρτη", "Πέμπτη", "Παρασκευή", "Σάββατο", "Κυριακή"];
 
-  const runSearch = async ({ lat, lng, radius, mode, weekday }: {
-    lat: number; lng: number; radius: number; mode: "night" | "long"; weekday?: number;
-  }) => {
+  const runSearch = async (
+    { lat, lng, radius, mode, weekday }: {
+      lat: number; lng: number; radius: number; mode: "night" | "long"; weekday?: number;
+    },
+    opts?: { pulseMap?: boolean }   // ⬅️ ΝΕΟ
+  ) => {
     const params = new URLSearchParams({ lat: String(lat), lng: String(lng), radius: String(radius), mode });
     if (typeof weekday === "number") params.set("weekday", String(weekday));
     const res = await fetch(`/api/search?${params.toString()}`, { cache: "no-store" });
@@ -22,9 +25,13 @@ export default function HomePage() {
     setData(json.geojson);
     setSuggested(json.suggestedWindow);
     setActiveWeekday(weekday);
+
+    if (opts?.pulseMap ?? true) triggerMapWave();
   };
 
-  useEffect(() => { runSearch({ lat: 37.979, lng: 23.7265, radius: 10000, mode: "night" }); }, []);
+  const runSearchNoPulse = (p: { lat: number; lng: number; radius: number; mode: "night" | "long"; weekday?: number }) =>
+    runSearch(p, { pulseMap: false });
+
 
   // state για το map border sweep / animation
   const [mapWave, setMapWave] = useState(false);
@@ -33,12 +40,16 @@ export default function HomePage() {
     requestAnimationFrame(() => setMapWave(true));
   };
 
+
+  useEffect(() => { runSearch({ lat: 37.979, lng: 23.7265, radius: 10000, mode: "night" }); }, []);
+
+
   return (
     <main className="grid grid-cols-1 lg:grid-cols-[33vw_1fr] min-h-screen gap-6 lg:gap-10 p-4 lg:p-8">
       <div className="relative">
         <div className="lg:sticky lg:top-6">
           <div className="rounded-3xl lg:rounded-[46px] border border-white/30 overflow-hidden p-6 lg:p-12 h-auto lg:min-h-[calc(98vh-3rem)] bg-no-repeat bg-cover bg-center" style={{ backgroundImage: "url('/sidebarBackground.svg')" }}>
-            <Sidebar onSearch={runSearch} onWave={triggerMapWave} />
+            <Sidebar onSearch={runSearchNoPulse} onWave={triggerMapWave} />
           </div>
         </div>
       </div>
