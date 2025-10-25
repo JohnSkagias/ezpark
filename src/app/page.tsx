@@ -4,6 +4,7 @@ import Sidebar from "../components/Sidebar";
 import Map from "../components/Map";
 import ResultsList from "../components/ResultsList";
 import MapBorderSweep from "@/components/ui/MapBorderSweep";
+import Link from "next/link";
 
 export default function HomePage() {
   const [data, setData] = useState<GeoJSON.FeatureCollection>({ type: "FeatureCollection", features: [] });
@@ -76,6 +77,19 @@ export default function HomePage() {
 
         <h3 className="text-lg font-semibold text-white/90">Αποτελέσματα ({data.features.length})</h3>
         <ResultsList features={data.features} />
+
+        <footer className="pt-6 pb-10 text-center text-white/60">
+          <div className="text-xs">© 2025 EzPark. All rights reserved.</div>
+          <div className="mt-2 flex items-center justify-center gap-4 text-sm">
+            <Link href="/terms" className="hover:text-white transition-colors">
+              🧾 Όροι Χρήσης
+            </Link>
+            <span aria-hidden className="text-white/30">•</span>
+            <Link href="/privacy" className="hover:text-white transition-colors">
+              🔒 Πολιτική Απορρήτου
+            </Link>
+          </div>
+        </footer>
       </div>
     </main>
   );
