@@ -49,7 +49,11 @@ export default function HomePage() {
     <main className="grid grid-cols-1 lg:grid-cols-[33vw_1fr] min-h-screen gap-6 lg:gap-10 p-4 lg:p-8">
       <div className="relative">
         <div className="lg:sticky lg:top-6">
-          <div className="rounded-3xl lg:rounded-[46px] border border-white/30 overflow-hidden p-6 lg:p-12 h-auto lg:min-h-[calc(98vh-3rem)] bg-no-repeat bg-cover bg-center" style={{ backgroundImage: "url('/sidebarBackground.svg')" }}>
+          <div className="rounded-3xl lg:rounded-[46px] border border-white/30 overflow-hidden
+                          p-4 sm:p-5 lg:p-12
+                          h-auto lg:min-h-[calc(98vh-3rem)]
+                          bg-no-repeat bg-cover bg-center"
+            style={{ backgroundImage: "url('/sidebarBackground.svg')" }}>
             <Sidebar onSearch={runSearchNoPulse} onWave={triggerMapWave} />
           </div>
         </div>

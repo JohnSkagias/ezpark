@@ -73,15 +73,15 @@ export default function Sidebar({ onSearch, onWave }: Props) {
 
 
   return (
-    <aside className="h-full p-5 text-white">
+    <aside className="h-full p-4 sm:p-5 text-white">
       <div className="flex flex-col h-full justify-between">
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           <div className="flex items-center justify-center">
-            <img src="/ezparkTitle.svg" alt="ezpark.gr" className="h-26 w-auto" />
+            <img src="/ezparkTitle.svg" alt="ezpark.gr" className="h-18 lg:h-26 w-auto" />
           </div>
 
           {/* Mode segmented */}
-          <div className="relative rounded-full bg-white/10 p-2 mt-[clamp(1.5rem,6vh,5rem)] overflow-hidden">
+          <div className="relative rounded-full bg-white/10 p-1.5 sm:p-2 mt-3 lg:mt-[clamp(1.5rem,6vh,5rem)] overflow-hidden">
             {/* Slider πίσω από τα κουμπιά */}
             <motion.div
               aria-hidden
@@ -117,7 +117,7 @@ export default function Sidebar({ onSearch, onWave }: Props) {
                 whileTap={{ scale: 0.97 }}
                 onClick={() => handleMode("night")}
                 className={[
-                  "z-10 px-4 py-3 text-sm font-medium rounded-full",
+                  "z-10 px-3 py-2 lg:px-4 lg:py-3 text-sm font-medium rounded-full",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/60",
                   mode === "night" ? "text-white" : "text-white/85 hover:text-white",
                 ].join(" ")}
@@ -133,7 +133,7 @@ export default function Sidebar({ onSearch, onWave }: Props) {
                 whileTap={{ scale: 0.97 }}
                 onClick={() => handleMode("long")}
                 className={[
-                  "z-10 px-4 py-3 text-sm font-medium rounded-full",
+                  "z-10 px-3 py-2 lg:px-4 lg:py-3 text-sm font-medium rounded-full",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/60",
                   mode === "long" ? "text-white" : "text-white/85 hover:text-white",
                 ].join(" ")}
@@ -144,7 +144,7 @@ export default function Sidebar({ onSearch, onWave }: Props) {
           </div>
 
           {/* Scope segmented */}
-          <div className="relative rounded-full bg-white/10 p-2 overflow-hidden mt-3">
+          <div className="relative rounded-full bg-white/10 p-1.5 sm:p-2 overflow-hidden mt-2.5">
             {/* slider πίσω από τα κουμπιά */}
             <motion.div
               aria-hidden
@@ -196,7 +196,7 @@ export default function Sidebar({ onSearch, onWave }: Props) {
                 whileTap={{ scale: 0.97 }}
                 onClick={() => setScope("all")}
                 className={[
-                  "z-10 px-4 py-3 text-sm font-medium rounded-full",
+                  "z-10 px-3 py-2 lg:px-4 lg:py-3 text-sm font-medium rounded-full",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300/60",
                   scope === "all" ? "text-white" : "text-white/85 hover:text-white",
                 ].join(" ")}
@@ -224,7 +224,7 @@ export default function Sidebar({ onSearch, onWave }: Props) {
                 whileTap={{ scale: 0.97 }}
                 onClick={() => setScope("addr")}
                 className={[
-                  "z-10 px-4 py-3 text-sm font-medium rounded-full",
+                  "z-10 px-3 py-2 lg:px-4 lg:py-3 text-sm font-medium rounded-full",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300/60",
                   scope === "addr" ? "text-white" : "text-white/85 hover:text-white",
                 ].join(" ")}
