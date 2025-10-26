@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Sidebar from "../components/Sidebar";
 import Map from "../components/Map";
 import ResultsList from "../components/ResultsList";
@@ -12,6 +12,22 @@ export default function HomePage() {
   const [activeWeekday, setActiveWeekday] = useState<number | undefined>(undefined);
   const dayNameGR = (d: Date) => new Intl.DateTimeFormat("el-GR", { weekday: "long" }).format(d).replace(/^./, (c) => c.toUpperCase());
   const dayNames = ["", "Δευτέρα", "Τρίτη", "Τετάρτη", "Πέμπτη", "Παρασκευή", "Σάββατο", "Κυριακή"];
+  const mapRef = useRef<HTMLDivElement>(null);
+
+  const smoothScrollTo = (targetY: number, duration = 1100) => {
+    const startY = window.pageYOffset;
+    const distance = targetY - startY;
+    const start = performance.now();
+    const easeInOutCubic = (t: number) =>
+      t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+    const step = (now: number) => {
+      const t = Math.min(1, (now - start) / duration);
+      window.scrollTo(0, startY + distance * easeInOutCubic(t));
+      if (t < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  };
 
   const runSearch = async (
     { lat, lng, radius, mode, weekday }: {
@@ -26,6 +42,11 @@ export default function HomePage() {
     setData(json.geojson);
     setSuggested(json.suggestedWindow);
     setActiveWeekday(weekday);
+
+    // Αν είμαστε σε small view, κάνε smooth scroll προς το map
+    if (window.innerWidth < 1022 && mapRef.current) {
+      smoothScrollTo(mapRef.current.getBoundingClientRect().top + window.pageYOffset - 60, 1100);
+    }
 
     if (opts?.pulseMap ?? true) triggerMapWave();
   };
@@ -65,7 +86,7 @@ export default function HomePage() {
           <span className="text-emerald-400">{activeWeekday ? dayNames[activeWeekday] : `σήμερα ${dayNameGR(new Date())}`}</span>
         </h2>
 
-        <div className="relative rounded-[28px] border border-white/30 overflow-hidden shadow-xl">
+        <div ref={mapRef} className="relative rounded-[28px] border border-white/30 overflow-hidden shadow-xl">
           <div className="h-[520px]">
             <Map geojson={data} />
           </div>

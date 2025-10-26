@@ -271,7 +271,7 @@ export default function Sidebar({ onSearch, onWave }: Props) {
           )}
 
           {/* Αναζήτηση */}
-          <div className="mt-3">
+          <div className="mt-2.5 sm:mt-3">
             <SearchWaveButton
               className="mt-4"
               onClick={() => onSearch({ lat, lng, radius: scope === "addr" ? (advRadius || 1000) : radius, mode, weekday: advDay })}
@@ -316,7 +316,7 @@ export default function Sidebar({ onSearch, onWave }: Props) {
             {/* backdrop */}
             <div className="absolute inset-0 bg-black/0 rounded-[32px]" onClick={() => setShowAdv(false)} />
             {/* panel */}
-            <div className="relative w-[92%] rounded-[28px] border border-white/20 backdrop-blur bg-neutral-800/20 p-4">
+            <div className="relative w-[94%] sm:w-[92%] rounded-2xl sm:rounded-[28px] border border-white/20 backdrop-blur bg-neutral-800/20 p-3 sm:p-4">
               {/* Days pill */}
               <div className="rounded-full bg-white/10 px-4 py-2 flex flex-wrap gap-3 items-center justify-center">
                 {days.map((d) => (
