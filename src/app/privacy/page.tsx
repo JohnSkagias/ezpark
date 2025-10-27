@@ -83,7 +83,7 @@ export default function PrivacyPage() {
                         <h2 className="text-xl sm:text-2xl font-semibold text-emerald-400">5. Επικοινωνία</h2>
                         <p>
                             Αν έχετε οποιαδήποτε ερώτηση σχετικά με την πολιτική απορρήτου, επικοινωνήστε στο:
-                            📧 info@ezpark.gr
+                            📧 contactezparkgr@gmail.com
                         </p>
                     </section>
                 </article>

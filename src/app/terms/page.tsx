@@ -87,7 +87,7 @@ export default function TermsPage() {
 
                     <section className="space-y-3">
                         <h2 className="text-xl sm:text-2xl font-semibold text-emerald-400">5. Επικοινωνία</h2>
-                        <p>Για οποιαδήποτε απορία, μπορείτε να επικοινωνήσετε στο: 📧 info@ezpark.gr</p>
+                        <p>Για οποιαδήποτε απορία, μπορείτε να επικοινωνήσετε στο: 📧 contactezparkgr@gmail.com</p>
                     </section>
                 </article>
             </div>

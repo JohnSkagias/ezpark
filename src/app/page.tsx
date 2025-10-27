@@ -33,7 +33,7 @@ export default function HomePage() {
     { lat, lng, radius, mode, weekday }: {
       lat: number; lng: number; radius: number; mode: "night" | "long"; weekday?: number;
     },
-    opts?: { pulseMap?: boolean }   // ⬅️ ΝΕΟ
+    opts?: { pulseMap?: boolean }
   ) => {
     const params = new URLSearchParams({ lat: String(lat), lng: String(lng), radius: String(radius), mode });
     if (typeof weekday === "number") params.set("weekday", String(weekday));
