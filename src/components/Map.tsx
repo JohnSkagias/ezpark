@@ -3,7 +3,14 @@ import { useEffect, useRef } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
-type MapProps = { geojson?: GeoJSON.FeatureCollection; center?: [number, number]; zoom?: number; };
+// αλλαγή τύπου props
+type MapProps = {
+  geojson?: GeoJSON.FeatureCollection;
+  center?: [number, number];
+  zoom?: number;
+  focus?: { coords: [number, number]; props?: any } | null; // ⬅️ ΝΕΟ
+};
+
 
 function toPins(fc: GeoJSON.FeatureCollection): GeoJSON.FeatureCollection {
   const pts: GeoJSON.Feature[] = [];
@@ -63,7 +70,7 @@ function boundsOfFeatureCollection(fc: GeoJSON.FeatureCollection) {
 
 
 
-export default function Map({ geojson, center = [23.709115, 37.963455], zoom = 12 }: MapProps) {
+export default function Map({ geojson, center = [23.709115, 37.963455], zoom = 12, focus = null }: MapProps) {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapObj = useRef<maplibregl.Map | null>(null);
 
@@ -136,7 +143,7 @@ export default function Map({ geojson, center = [23.709115, 37.963455], zoom = 1
       lastBoundsRef.current[1][0] === b[1][0] &&
       lastBoundsRef.current[1][1] === b[1][1];
 
-    if (sameBounds) return; // ⛔️ αποφυγή δεύτερου fit στο ίδιο extent
+    if (sameBounds) return; // αποφυγή δεύτερου fit στο ίδιο extent
 
     lastBoundsRef.current = b;
 
@@ -154,6 +161,28 @@ export default function Map({ geojson, center = [23.709115, 37.963455], zoom = 1
       if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
     };
   }, [geojson]);
+
+  // focus από έξω (λίστα) → flyTo + popup
+  useEffect(() => {
+    if (!mapObj.current || !focus) return;
+    const map = mapObj.current;
+
+    const props = (focus.props ?? {}) as any;
+    const name = props.name || "Οδός";
+    const muni = props.municipality || "";
+    const q = encodeURIComponent(`${name}, ${muni}`);
+    const url = `https://www.google.com/maps/search/?api=1&query=${q}`;
+    const html = `
+    <div style="font-weight:700;margin-bottom:2px">${name}</div>
+    <div style="opacity:.8;margin-bottom:8px">${muni}</div>
+    <a href="${url}" target="_blank" rel="noopener noreferrer" class="ezpopup-btn">Open in Google Maps</a>
+  `;
+
+    map.flyTo({ center: focus.coords, zoom: 15 });
+    new maplibregl.Popup({ closeButton: false, offset: 10, className: "ezpopup" })
+      .setLngLat(focus.coords).setHTML(html).addTo(map);
+  }, [focus]);
+
 
 
   return <div ref={mapRef} style={{ width: "100%", height: "100%" }} />;

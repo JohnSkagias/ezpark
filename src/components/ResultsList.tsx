@@ -1,10 +1,9 @@
 "use client";
 import { motion } from "framer-motion";
 
-type Props = { features: GeoJSON.Feature[] };
+type Props = { features: GeoJSON.Feature[]; onSelect?: (f: GeoJSON.Feature) => void };
 
-export default function ResultsList({ features }: Props) {
-  // --- Empty state ---
+export default function ResultsList({ features, onSelect }: Props) {
   if (!features || features.length === 0) {
     return (
       <div className="space-y-3">
@@ -53,9 +52,10 @@ export default function ResultsList({ features }: Props) {
             // ✅ κρατάμε το key στο ΕΞΩ wrapper σου
             <div
               key={i}
+              onClick={() => onSelect?.(f)}
               className="group relative overflow-hidden w-full rounded-[22px] border border-white/30
                  bg-gradient-to-r from-#3A5145 to-emerald-600/30
-                 px-5 py-4 hover:from-emerald-700/30 hover:to-emerald-600/20 transition"
+                 px-5 py-4 hover:from-emerald-700/30 hover:to-emerald-600/20 transition cursor-pointer"
             >
               {/* shimmer λωρίδα στο hover (καθαρά CSS) */}
               <span
@@ -81,6 +81,7 @@ export default function ResultsList({ features }: Props) {
                 </div>
 
                 <a
+                  onClick={(e) => e.stopPropagation()}
                   href={url}
                   target="_blank"
                   rel="noopener noreferrer"

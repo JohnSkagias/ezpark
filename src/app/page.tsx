@@ -29,6 +29,7 @@ export default function HomePage() {
     requestAnimationFrame(step);
   };
 
+
   const runSearch = async (
     { lat, lng, radius, mode, weekday }: {
       lat: number; lng: number; radius: number; mode: "night" | "long"; weekday?: number;
@@ -63,6 +64,33 @@ export default function HomePage() {
     requestAnimationFrame(() => setMapWave(true));
   };
 
+  const [focus, setFocus] = useState<{ coords: [number, number]; props?: any } | null>(null);
+  const handleSelectFromList = (f: GeoJSON.Feature) => {
+    const c = featureCenter(f);
+    if (!c) return;
+    setFocus({ coords: c, props: f.properties ?? {} });
+
+    // smooth scroll ΠΑΝΤΑ (mobile + desktop)
+    if (mapRef.current) {
+      smoothScrollTo(mapRef.current.getBoundingClientRect().top + window.pageYOffset - 60, 1000);
+    }
+
+    // ένα μικρό visual feedback στο frame του map
+    triggerMapWave();
+  };
+
+  function featureCenter(f: GeoJSON.Feature): [number, number] | null {
+    if (!f.geometry) return null;
+    if (f.geometry.type === "LineString") {
+      const coords = f.geometry.coordinates as number[][];
+      if (coords.length === 0) return null;
+      return coords[Math.floor(coords.length / 2)] as [number, number];
+    }
+    if (f.geometry.type === "Point") {
+      return f.geometry.coordinates as [number, number];
+    }
+    return null;
+  }
 
   useEffect(() => {
     runSearch(
@@ -94,7 +122,7 @@ export default function HomePage() {
 
         <div ref={mapRef} className="relative rounded-[28px] border border-white/30 overflow-hidden shadow-xl">
           <div className="h-[520px]">
-            <Map geojson={data} />
+            <Map geojson={data} focus={focus} />
           </div>
           {/* λεπτό, διακριτικό sweep πάνω στο border */}
           <MapBorderSweep trigger={mapWave} radius={28} thickness={2} duration={0.65} fadeOutAfter={0.5} />
@@ -107,7 +135,7 @@ export default function HomePage() {
         )}
 
         <h3 className="text-lg font-semibold text-white/90">Αποτελέσματα ({data.features.length})</h3>
-        <ResultsList features={data.features ?? []} />
+        <ResultsList features={data.features ?? []} onSelect={handleSelectFromList} />
 
         <footer className="mt-10 py-6 text-center text-white/60 border-t border-white/10">
           <div className="text-xs">© 2025 EzPark. All rights reserved.</div>
