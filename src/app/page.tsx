@@ -33,7 +33,7 @@ export default function HomePage() {
     { lat, lng, radius, mode, weekday }: {
       lat: number; lng: number; radius: number; mode: "night" | "long"; weekday?: number;
     },
-    opts?: { pulseMap?: boolean }
+    opts?: { pulseMap?: boolean; autoScroll?: boolean }
   ) => {
     const params = new URLSearchParams({ lat: String(lat), lng: String(lng), radius: String(radius), mode });
     if (typeof weekday === "number") params.set("weekday", String(weekday));
@@ -43,8 +43,9 @@ export default function HomePage() {
     setSuggested(json.suggestedWindow);
     setActiveWeekday(weekday);
 
-    // Αν είμαστε σε small view, κάνε smooth scroll προς το map
-    if (window.innerWidth < 1022 && mapRef.current) {
+    //scroll ΜΟΝΟ όταν το επιτρέπουμε ρητά (default: true)
+    const shouldScroll = opts?.autoScroll ?? true;
+    if (shouldScroll && window.innerWidth < 1022 && mapRef.current) {
       smoothScrollTo(mapRef.current.getBoundingClientRect().top + window.pageYOffset - 60, 1100);
     }
 
@@ -63,7 +64,12 @@ export default function HomePage() {
   };
 
 
-  useEffect(() => { runSearch({ lat: 37.979, lng: 23.7265, radius: 10000, mode: "night" }); }, []);
+  useEffect(() => {
+    runSearch(
+      { lat: 37.979, lng: 23.7265, radius: 10000, mode: "night" },
+      { pulseMap: true, autoScroll: false } // δεν κάνουμε scroll στο load
+    );
+  }, []);
 
 
   return (
