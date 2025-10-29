@@ -241,7 +241,7 @@ export default function Sidebar({ onSearch, onWave }: Props) {
                 value={addr}
                 onChange={(e) => setAddr(e.target.value)}
                 placeholder="π.χ. Πραξιτέλους Πειραιάς"
-                className="bg-white/5 border-white/10 text-white placeholder:text-white/60"
+                className="bg-white/5 px-4 py-5 lg:py-5 rounded-[18px] border-white/10 text-white placeholder:text-white/60"
               />
 
               {suggests.length > 0 && (
