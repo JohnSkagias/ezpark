@@ -9,6 +9,7 @@ type MapProps = {
   center?: [number, number];
   zoom?: number;
   focus?: { coords: [number, number]; props?: any } | null; // ⬅️ ΝΕΟ
+  userLocation?: [number, number] | null;
 };
 
 
@@ -70,7 +71,7 @@ function boundsOfFeatureCollection(fc: GeoJSON.FeatureCollection) {
 
 
 
-export default function Map({ geojson, center = [23.709115, 37.963455], zoom = 12, focus = null }: MapProps) {
+export default function Map({ geojson, center = [23.709115, 37.963455], zoom = 12, focus = null, userLocation = null }: MapProps) {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapObj = useRef<maplibregl.Map | null>(null);
 
@@ -110,6 +111,36 @@ export default function Map({ geojson, center = [23.709115, 37.963455], zoom = 1
         new maplibregl.Popup({ closeButton: false, offset: 10, className: "ezpopup" })
           .setLngLat(coords).setHTML(html).addTo(mapObj.current!);
       });
+
+      // --- USER LOCATION SOURCE + LAYERS ---
+      mapObj.current.addSource("user-loc", {
+        type: "geojson",
+        data: { type: "FeatureCollection", features: [] }
+      });
+      mapObj.current.addLayer({
+        id: "user-loc-halo",
+        type: "circle",
+        source: "user-loc",
+        paint: {
+          "circle-radius": 26,
+          "circle-color": "rgba(59,130,246,0.18)", // απαλό μπλε halo
+          "circle-blur": 0.2
+        },
+        layout: { visibility: "none" }
+      });
+      mapObj.current.addLayer({
+        id: "user-loc-dot",
+        type: "circle",
+        source: "user-loc",
+        paint: {
+          "circle-radius": 7,
+          "circle-color": "#1D4ED8",     // μπλε κουκίδα
+          "circle-stroke-color": "#ffffff",
+          "circle-stroke-width": 3
+        },
+        layout: { visibility: "none" }
+      });
+
 
       mapObj.current.on("mouseenter", "road-pins-circle", () => (mapObj.current!.getCanvas().style.cursor = "pointer"));
       mapObj.current.on("mouseleave", "road-pins-circle", () => (mapObj.current!.getCanvas().style.cursor = ""));
@@ -182,6 +213,29 @@ export default function Map({ geojson, center = [23.709115, 37.963455], zoom = 1
     new maplibregl.Popup({ closeButton: false, offset: 10, className: "ezpopup" })
       .setLngLat(focus.coords).setHTML(html).addTo(map);
   }, [focus]);
+
+
+  useEffect(() => {
+    if (!mapObj.current) return;
+    const map = mapObj.current;
+    const src = map.getSource("user-loc") as maplibregl.GeoJSONSource | undefined;
+    if (!src) return;
+
+    if (userLocation) {
+      const [lng, lat] = userLocation;
+      const fc: GeoJSON.FeatureCollection = {
+        type: "FeatureCollection",
+        features: [{ type: "Feature", geometry: { type: "Point", coordinates: [lng, lat] }, properties: {} }]
+      };
+      src.setData(fc);
+      map.setLayoutProperty("user-loc-halo", "visibility", "visible");
+      map.setLayoutProperty("user-loc-dot", "visibility", "visible");
+    } else {
+      src.setData({ type: "FeatureCollection", features: [] } as any);
+      map.setLayoutProperty("user-loc-halo", "visibility", "none");
+      map.setLayoutProperty("user-loc-dot", "visibility", "none");
+    }
+  }, [userLocation]);
 
 
 

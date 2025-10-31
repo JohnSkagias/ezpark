@@ -53,6 +53,9 @@ export default function HomePage() {
     if (opts?.pulseMap ?? true) triggerMapWave();
   };
 
+  // state
+  const [userLoc, setUserLoc] = useState<[number, number] | null>(null);
+
   const runSearchNoPulse = (p: { lat: number; lng: number; radius: number; mode: "night" | "long"; weekday?: number }) =>
     runSearch(p, { pulseMap: false });
 
@@ -109,7 +112,7 @@ export default function HomePage() {
                           h-auto lg:min-h-[calc(98vh-3rem)]
                           bg-no-repeat bg-cover bg-center"
             style={{ backgroundImage: "url('/sidebarBackground.svg')" }}>
-            <Sidebar onSearch={runSearchNoPulse} onWave={triggerMapWave} />
+            <Sidebar onSearch={runSearchNoPulse} onWave={triggerMapWave} onUserLocation={({ lat, lng }) => setUserLoc([lng, lat])} />
           </div>
         </div>
       </div>
@@ -122,7 +125,7 @@ export default function HomePage() {
 
         <div ref={mapRef} className="relative rounded-[28px] border border-white/30 overflow-hidden shadow-xl">
           <div className="h-[520px]">
-            <Map geojson={data} focus={focus} />
+            <Map geojson={data} focus={focus} userLocation={userLoc} />
           </div>
           {/* λεπτό, διακριτικό sweep πάνω στο border */}
           <MapBorderSweep trigger={mapWave} radius={28} thickness={2} duration={0.65} fadeOutAfter={0.5} />

@@ -154,3 +154,23 @@
   from{ transform: translateY(6px); opacity: 0; }
   to  { transform: translateY(0);   opacity: 1; }
 }
+
+
+
+/* Rotating white stroke γύρω από το κουμπί όταν locating */
+.locating-sweep::after{
+  content:"";
+  position:absolute;
+  inset:-2px;              /* να «αγκαλιάζει» το κουμπί */
+  border-radius:9999px;
+  /* Λεπτό τόξο 36° που γυρίζει (stroke) */
+  background: conic-gradient(from 0deg, #ffffff 0 36deg, transparent 36deg 360deg);
+  -webkit-mask: 
+    linear-gradient(#000 0 0) content-box, 
+    linear-gradient(#000 0 0);                       /* κρατάει μόνο το περίγραμμμα */
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  padding:2px;                                       /* πάχος stroke */
+  animation: ez-spin 1s linear infinite;             /* 1s ανά κύκλο */
+}
+@keyframes ez-spin { to { transform: rotate(360deg);} }

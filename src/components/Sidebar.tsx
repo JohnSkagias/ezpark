@@ -12,10 +12,11 @@ import { motion } from "framer-motion";
 type Props = {
   onSearch: (p: { lat: number; lng: number; radius: number; mode: "night" | "long"; weekday?: number }) => void;
   onWave?: () => void;
+  onUserLocation?: (p: { lat: number; lng: number }) => void;
 };
 
 
-export default function Sidebar({ onSearch, onWave }: Props) {
+export default function Sidebar({ onSearch, onWave, onUserLocation }: Props) {
   const [mode, setMode] = useState<"night" | "long">("night");
   const [scope, setScope] = useState<"all" | "addr">("all");
 
@@ -29,6 +30,10 @@ export default function Sidebar({ onSearch, onWave }: Props) {
   const [showAdv, setShowAdv] = useState(false);
   const [advDay, setAdvDay] = useState<number | undefined>(undefined); // 1..7 (ISO), undefined = auto (mode)
   const [advRadius, setAdvRadius] = useState<number>(1000); // για scope=addr
+
+  const [locating, setLocating] = useState(false);
+  const [geoErr, setGeoErr] = useState<string | null>(null);
+
 
 
   // debounce geocoding (όπως είχες)
@@ -60,6 +65,50 @@ export default function Sidebar({ onSearch, onWave }: Props) {
     //   weekday: advDay,
     // });
   };
+
+  // state refs
+  const locateStartRef = useRef<number>(0);
+
+  const handleUseMyLocation = () => {
+    setGeoErr(null);
+    if (!("geolocation" in navigator)) { setGeoErr("Ο browser δεν υποστηρίζει εντοπισμό τοποθεσίας."); return; }
+    setLocating(true);
+    locateStartRef.current = performance.now();
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+
+        // ενημέρωσε local UI
+        setLat(latitude); setLng(longitude);
+        setAddr("Τρέχουσα τοποθεσία"); setSuggests([]);
+
+        // δείξε marker στο χάρτη (μέσω parent)
+        onUserLocation?.({ lat: latitude, lng: longitude });
+
+        // κάνε άμεσα search στα 1500μ με το τρέχον mode/weekday
+        onSearch({ lat: latitude, lng: longitude, radius: 1500, mode, weekday: advDay });
+        onWave?.();
+
+        // ΕΛΑΧΙΣΤΟ animation 1s
+        const elapsed = performance.now() - locateStartRef.current;
+        const min = 1000;
+        const end = () => setLocating(false);
+        elapsed < min ? setTimeout(end, min - elapsed) : end();
+      },
+      (err) => {
+        const end = () => setLocating(false);
+        const elapsed = performance.now() - locateStartRef.current;
+        elapsed < 500 ? setTimeout(end, 500 - elapsed) : end();  // και στο error ένα minimum
+        if (err.code === err.PERMISSION_DENIED) setGeoErr("Δεν δόθηκε άδεια για τοποθεσία.");
+        else if (err.code === err.POSITION_UNAVAILABLE) setGeoErr("Αδυναμία προσδιορισμού τοποθεσίας.");
+        else if (err.code === err.TIMEOUT) setGeoErr("Το αίτημα έληξε. Δοκίμασε ξανά.");
+        else setGeoErr("Κάτι πήγε στραβά. Δοκίμασε ξανά.");
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  };
+
 
 
   const days: { label: string; iso: number }[] = [
@@ -237,12 +286,32 @@ export default function Sidebar({ onSearch, onWave }: Props) {
           {scope === "addr" && (
             <div className="space-y-1 relative">
               <Label className="text-white/80">Διεύθυνση</Label>
-              <Input
-                value={addr}
-                onChange={(e) => setAddr(e.target.value)}
-                placeholder="π.χ. Πραξιτέλους Πειραιάς"
-                className="bg-white/5 px-4 py-5 lg:py-5 rounded-[18px] border-white/10 text-white placeholder:text-white/60"
-              />
+              <div className="flex items-center gap-2">
+                <Input
+                  value={addr}
+                  onChange={(e) => setAddr(e.target.value)}
+                  placeholder="π.χ. Πραξιτέλους Πειραιάς"
+                  className="flex-1 bg-white/5 px-4 py-5 lg:py-5 rounded-[18px] border-white/10 text-white placeholder:text-white/60"
+                />
+
+                <button
+                  type="button"
+                  onClick={handleUseMyLocation}
+                  aria-label="Χρήση τρέχουσας τοποθεσίας"
+                  className={[
+                    "relative shrink-0 h-11 w-11 rounded-full border border-white/30 bg-white/5 flex items-center justify-center transition disabled:opacity-60",
+                    locating ? "locating-sweep" : "hover:bg-white/10"
+                  ].join(" ")}
+                  disabled={locating}
+                  title="Χρήση τρέχουσας τοποθεσίας"
+                >
+                  {locating ? (
+                    <span className="block h-5 w-5 rounded-full border-2 border-white/70 border-t-transparent animate-spin" />
+                  ) : (
+                    <img src="/locationIcon.svg" alt="" className="h-12 w-12 opacity-90" />
+                  )}
+                </button>
+              </div>
 
               {suggests.length > 0 && (
                 <div className="absolute z-20 mt-1 w-full rounded-xl border border-white/10 bg-black/30 backdrop-blur p-1 max-h-64 overflow-auto">
@@ -266,7 +335,11 @@ export default function Sidebar({ onSearch, onWave }: Props) {
                 </div>
               )}
 
-              <p className="text-xs text-white/60">* Γράψε διεύθυνση, περιοχή, μαγαζί κτλπ</p>
+              {/* hint + geo error */}
+              <div className="flex items-start justify-between">
+                <p className="text-xs text-white/60">* Γράψε διεύθυνση, περιοχή, μαγαζί κτλπ</p>
+                {geoErr && <p className="text-xs text-rose-300">{geoErr}</p>}
+              </div>
             </div>
           )}
 
