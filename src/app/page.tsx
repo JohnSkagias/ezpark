@@ -53,8 +53,10 @@ export default function HomePage() {
     if (opts?.pulseMap ?? true) triggerMapWave();
   };
 
-  // state
+  // — user location on initial load —
   const [userLoc, setUserLoc] = useState<[number, number] | null>(null);
+  const locRequestedRef = useRef(false);
+
 
   const runSearchNoPulse = (p: { lat: number; lng: number; radius: number; mode: "night" | "long"; weekday?: number }) =>
     runSearch(p, { pulseMap: false });
@@ -95,12 +97,39 @@ export default function HomePage() {
     return null;
   }
 
+  // αρχικό search με user location ή default
   useEffect(() => {
     runSearch(
       { lat: 37.979, lng: 23.7265, radius: 10000, mode: "night" },
       { pulseMap: true, autoScroll: false } // δεν κάνουμε scroll στο load
     );
   }, []);
+
+  // Ζήτησε άδεια/λήψη τοποθεσίας ΜΙΑ φορά στο load (χωρίς να επηρεάσουμε τη ροή του search)
+  useEffect(() => {
+    if (locRequestedRef.current) return;
+    locRequestedRef.current = true;
+
+    if (!("geolocation" in navigator)) return;
+
+    // αν υπάρχει Permissions API, απόφυγε άσκοπα prompts όταν είναι ήδη 'denied'
+    (async () => {
+      try {
+        const perm: any = await (navigator as any).permissions?.query({ name: "geolocation" as any });
+        if (perm?.state === "denied") return;
+      } catch {/* τίποτα */ }
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const { latitude, longitude } = pos.coords;
+          // Map.tsx περιμένει [lng, lat]
+          setUserLoc([longitude, latitude]);
+        },
+        () => {/* αν αρνηθεί/αποτύχει, απλά συνεχίζουμε κανονικά */ },
+        { enableHighAccuracy: true, timeout: 8000, maximumAge: 30000 }
+      );
+    })();
+  }, []);
+
 
 
   return (
