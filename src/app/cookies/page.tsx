@@ -7,20 +7,20 @@ export default function CookiesPage() {
     <main className="relative min-h-screen overflow-hidden px-4 py-12 flex items-center justify-center">
       {/* Subtle animated background */}
       <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute left-1/2 top-1/2 h-[820px] w-[820px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-500/15 blur-3xl animate-pulse" />
-        <div className="absolute -bottom-24 -right-24 h-[520px] w-[520px] rounded-full opacity-25 blur-xl [background:conic-gradient(from_90deg,rgba(16,185,129,0.25),transparent_35%,rgba(59,130,246,0.15),transparent_70%,rgba(16,185,129,0.25))] [animation:spin_40s_linear_infinite]" />
+        {/* large emerald glow */}
+        <div className="absolute left-1/2 top-1/2 h-[900px] w-[900px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-500/15 blur-3xl animate-pulse" />
+        {/* rotating conic gradient ring */}
+        <div className="absolute -top-32 -right-32 h-[520px] w-[520px] rounded-full opacity-25 blur-xl [background:conic-gradient(from_180deg,rgba(16,185,129,0.25),transparent_35%,rgba(59,130,246,0.15),transparent_70%,rgba(16,185,129,0.25))] [animation:spin_40s_linear_infinite]" />
       </div>
 
       {/* Card */}
-      <div
-        className="
-          mx-auto w-full max-w-6xl 
-          rounded-[28px] border border-white/15 
-          bg-gradient-to-b from-neutral-900/95 to-neutral-950/95 
-          shadow-2xl p-6 sm:p-12 text-white
-          my-6 md:my-8 lg:my-0
-        "
-      >
+      <div className="
+                mx-auto w-full max-w-6xl 
+                rounded-[28px] border border-white/15 
+                bg-gradient-to-b from-neutral-900/95 to-neutral-950/95 
+                shadow-2xl p-6 sm:p-12 text-white
+                my-6 md:my-8 lg:my-0
+                ">
         {/* Back */}
         <div className="mb-6">
           <Link

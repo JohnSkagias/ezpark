@@ -263,8 +263,13 @@ export default function HomePage() {
             <Link href="/privacy" className="hover:text-white transition-colors">
               🔒 Πολιτική Απορρήτου
             </Link>
+            <span aria-hidden className="text-white/30">•</span>
+            <Link href="/cookies" className="hover:text-white transition-colors">
+              🍪 Πολιτική Cookies
+            </Link>
           </div>
         </footer>
+
       </div>
     </main>
   );
