@@ -75,6 +75,28 @@ export default function Map({ geojson, center = [23.709115, 37.963455], zoom = 1
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapObj = useRef<maplibregl.Map | null>(null);
 
+  const applyUserLocation = (map: maplibregl.Map, loc: [number, number] | null) => {
+    const src = map.getSource("user-loc") as maplibregl.GeoJSONSource | undefined;
+    if (!src) return false; // πες στον caller ότι «δεν υπήρχε source ακόμη»
+
+    if (loc) {
+      const [lng, lat] = loc;
+      const fc: GeoJSON.FeatureCollection = {
+        type: "FeatureCollection",
+        features: [{ type: "Feature", geometry: { type: "Point", coordinates: [lng, lat] }, properties: {} }]
+      };
+      src.setData(fc);
+      map.setLayoutProperty("user-loc-halo", "visibility", "visible");
+      map.setLayoutProperty("user-loc-dot", "visibility", "visible");
+    } else {
+      src.setData({ type: "FeatureCollection", features: [] } as any);
+      map.setLayoutProperty("user-loc-halo", "visibility", "none");
+      map.setLayoutProperty("user-loc-dot", "visibility", "none");
+    }
+    return true;
+  };
+
+
   useEffect(() => {
     if (!mapRef.current || mapObj.current) return;
     const DARK_STYLE = "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json";
@@ -141,6 +163,10 @@ export default function Map({ geojson, center = [23.709115, 37.963455], zoom = 1
         layout: { visibility: "none" }
       });
 
+      // Αν έχουμε ήδη θέση από το parent τη στιγμή που φορτώθηκε το style, εφάρμοσέ την
+      if (userLocation) {
+        applyUserLocation(mapObj.current!, userLocation);
+      }
 
       mapObj.current.on("mouseenter", "road-pins-circle", () => (mapObj.current!.getCanvas().style.cursor = "pointer"));
       mapObj.current.on("mouseleave", "road-pins-circle", () => (mapObj.current!.getCanvas().style.cursor = ""));
@@ -218,24 +244,24 @@ export default function Map({ geojson, center = [23.709115, 37.963455], zoom = 1
   useEffect(() => {
     if (!mapObj.current) return;
     const map = mapObj.current;
-    const src = map.getSource("user-loc") as maplibregl.GeoJSONSource | undefined;
-    if (!src) return;
 
-    if (userLocation) {
-      const [lng, lat] = userLocation;
-      const fc: GeoJSON.FeatureCollection = {
-        type: "FeatureCollection",
-        features: [{ type: "Feature", geometry: { type: "Point", coordinates: [lng, lat] }, properties: {} }]
-      };
-      src.setData(fc);
-      map.setLayoutProperty("user-loc-halo", "visibility", "visible");
-      map.setLayoutProperty("user-loc-dot", "visibility", "visible");
-    } else {
-      src.setData({ type: "FeatureCollection", features: [] } as any);
-      map.setLayoutProperty("user-loc-halo", "visibility", "none");
-      map.setLayoutProperty("user-loc-dot", "visibility", "none");
-    }
+    // προσπάθησε τώρα
+    if (applyUserLocation(map, userLocation || null)) return;
+    
+
+    // αν δεν υπάρχει ακόμη το source, περίμενε το επόμενο 'styledata' και ξαναπροσπάθησε
+    const onStyleData = () => {
+      if (applyUserLocation(map, userLocation || null)) {
+        map.off("styledata", onStyleData);
+      }
+    };
+    map.on("styledata", onStyleData);
+
+    return () => {
+      map.off("styledata", onStyleData);
+    };
   }, [userLocation]);
+
 
 
 
