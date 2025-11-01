@@ -83,6 +83,12 @@ export default function HomePage() {
     // ένα μικρό visual feedback στο frame του map
     triggerMapWave();
   };
+  const handleNearbyHintClick = () => {
+    if (!nearby) return;
+    handleSelectFromList(nearby);        // ανοίγει popup & κάνει zoom (υπάρχον flow)
+    setShowNearbyHint(false);
+  };
+
 
   // hint όταν εντοπιστεί θέση
   const [justLocated, setJustLocated] = useState(false);
@@ -101,6 +107,24 @@ export default function HomePage() {
     }
     return null;
   }
+
+  // απόσταση σε μέτρα (Haversine)
+  function haversineMeters(lon1: number, lat1: number, lon2: number, lat2: number) {
+    const toRad = (x: number) => (x * Math.PI) / 180;
+    const R = 6371000; // m
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+    return 2 * R * Math.asin(Math.sqrt(a));
+  }
+
+  // hint state για κοντινό αποτέλεσμα
+  const [nearby, setNearby] = useState<GeoJSON.Feature | null>(null);
+  const [showNearbyHint, setShowNearbyHint] = useState(false);
+  const nearbyTimer = useRef<number | null>(null);
+
 
   // αρχικό search με user location ή default
   useEffect(() => {
@@ -137,14 +161,36 @@ export default function HomePage() {
 
   // Εμφάνισε hint όταν εντοπιστεί τοποθεσία χρήστη
   useEffect(() => {
-    if (!userLoc) return;
-    if (justLocatedTimer.current) window.clearTimeout(justLocatedTimer.current);
-    setJustLocated(true);
-    justLocatedTimer.current = window.setTimeout(() => setJustLocated(false), 2000);
-    return () => {
-      if (justLocatedTimer.current) window.clearTimeout(justLocatedTimer.current);
-    };
-  }, [userLoc]);
+    // θέλουμε userLoc + αποτελέσματα
+    if (!userLoc || !data || !data.features?.length) {
+      setNearby(null);
+      setShowNearbyHint(false);
+      if (nearbyTimer.current) window.clearTimeout(nearbyTimer.current);
+      return;
+    }
+
+    // βρες το πλησιέστερο κέντρο feature
+    let best: { f: GeoJSON.Feature; d: number; c: [number, number] } | null = null;
+    for (const f of data.features) {
+      const c = featureCenter(f);
+      if (!c) continue;
+      const d = haversineMeters(userLoc[0], userLoc[1], c[0], c[1]); // userLoc = [lng, lat]
+      if (!best || d < best.d) best = { f, d, c };
+    }
+
+    // αν είναι μέσα σε 1000m → δείξε hint για 5s
+    if (best && best.d <= 1000) {
+      setNearby(best.f);
+      setShowNearbyHint(true);
+      if (nearbyTimer.current) window.clearTimeout(nearbyTimer.current);
+      nearbyTimer.current = window.setTimeout(() => setShowNearbyHint(false), 5000);
+    } else {
+      setNearby(null);
+      setShowNearbyHint(false);
+      if (nearbyTimer.current) window.clearTimeout(nearbyTimer.current);
+    }
+  }, [userLoc, data]);
+
 
 
 
@@ -172,19 +218,27 @@ export default function HomePage() {
         <div ref={mapRef} className="relative rounded-[28px] border border-white/30 overflow-hidden shadow-xl">
           <div className="h-[520px]">
             <Map geojson={data} focus={focus} userLocation={userLoc} />
-            
-            {/* HINT: εντοπίστηκε τοποθεσία */}
+
+            {/* HINT: κοντινό αποτέλεσμα */}
             <div
               className={[
-                "pointer-events-none absolute left-4 bottom-4",
+                "absolute left-4 bottom-4 z-10",
                 "transition-all duration-300",
-                justLocated ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
+                showNearbyHint ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2 pointer-events-none"
               ].join(" ")}
             >
-              <div className="px-3 py-1.5 rounded-full bg-white/10 backdrop-blur border border-white/15 text-white/90 text-sm shadow">
-                📍 Εντοπίστηκε: κοντά σε εσάς
-              </div>
+              <button
+                onClick={handleNearbyHintClick}
+                className="px-3 py-1.5 rounded-full bg-white/10 backdrop-blur border border-white/15
+               text-white/90 text-sm shadow hover:bg-white/15 transition pointer-events-auto"
+              >
+                📍 Κοντά σας: <span className="font-medium">
+                  {String((nearby?.properties as any)?.name ?? "Οδός")}
+                </span>{" "}
+                – Προβολή
+              </button>
             </div>
+
           </div>
           {/* λεπτό, διακριτικό sweep πάνω στο border */}
           <MapBorderSweep trigger={mapWave} radius={28} thickness={2} duration={0.65} fadeOutAfter={0.5} />
