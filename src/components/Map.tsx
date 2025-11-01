@@ -74,6 +74,8 @@ function boundsOfFeatureCollection(fc: GeoJSON.FeatureCollection) {
 export default function Map({ geojson, center = [23.709115, 37.963455], zoom = 12, focus = null, userLocation = null }: MapProps) {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapObj = useRef<maplibregl.Map | null>(null);
+  const pannedOnceRef = useRef(false);
+
 
   const applyUserLocation = (map: maplibregl.Map, loc: [number, number] | null) => {
     const src = map.getSource("user-loc") as maplibregl.GeoJSONSource | undefined;
@@ -241,17 +243,33 @@ export default function Map({ geojson, center = [23.709115, 37.963455], zoom = 1
   }, [focus]);
 
 
+  //effect για user location και pan ωστε να ειναι inbounds
   useEffect(() => {
     if (!mapObj.current) return;
     const map = mapObj.current;
 
-    // προσπάθησε τώρα
-    if (applyUserLocation(map, userLocation || null)) return;
-    
+    // helper: αφού εφαρμοστεί η θέση, κάνε pan αν χρειάζεται (μόνο μία φορά)
+    const maybePanToUser = () => {
+      if (!userLocation || pannedOnceRef.current) return;
+      const pt = { lng: userLocation[0], lat: userLocation[1] };
+      const bounds = map.getBounds();
+      // αν δεν είναι ορατό το σημείο, κάνε ένα ήπιο pan
+      if (!bounds.contains(pt)) {
+        map.easeTo({ center: userLocation, duration: 650 });
+      }
+      pannedOnceRef.current = true;
+    };
 
-    // αν δεν υπάρχει ακόμη το source, περίμενε το επόμενο 'styledata' και ξαναπροσπάθησε
+    // 1) προσπάθησε τώρα
+    if (applyUserLocation(map, userLocation || null)) {
+      maybePanToUser();        // ⬅️ εδώ
+      return;
+    }
+
+    // 2) αν δεν υπάρχει ακόμη το source, περίμενε το 'styledata' και ξαναπροσπάθησε
     const onStyleData = () => {
       if (applyUserLocation(map, userLocation || null)) {
+        maybePanToUser();      // ⬅️ και εδώ, όταν επιτέλους στηθεί το layer
         map.off("styledata", onStyleData);
       }
     };
