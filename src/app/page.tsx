@@ -84,6 +84,11 @@ export default function HomePage() {
     triggerMapWave();
   };
 
+  // hint όταν εντοπιστεί θέση
+  const [justLocated, setJustLocated] = useState(false);
+  const justLocatedTimer = useRef<number | null>(null);
+
+
   function featureCenter(f: GeoJSON.Feature): [number, number] | null {
     if (!f.geometry) return null;
     if (f.geometry.type === "LineString") {
@@ -130,6 +135,18 @@ export default function HomePage() {
     })();
   }, []);
 
+  // Εμφάνισε hint όταν εντοπιστεί τοποθεσία χρήστη
+  useEffect(() => {
+    if (!userLoc) return;
+    if (justLocatedTimer.current) window.clearTimeout(justLocatedTimer.current);
+    setJustLocated(true);
+    justLocatedTimer.current = window.setTimeout(() => setJustLocated(false), 2000);
+    return () => {
+      if (justLocatedTimer.current) window.clearTimeout(justLocatedTimer.current);
+    };
+  }, [userLoc]);
+
+
 
 
   return (
@@ -155,6 +172,19 @@ export default function HomePage() {
         <div ref={mapRef} className="relative rounded-[28px] border border-white/30 overflow-hidden shadow-xl">
           <div className="h-[520px]">
             <Map geojson={data} focus={focus} userLocation={userLoc} />
+            
+            {/* HINT: εντοπίστηκε τοποθεσία */}
+            <div
+              className={[
+                "pointer-events-none absolute left-4 bottom-4",
+                "transition-all duration-300",
+                justLocated ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
+              ].join(" ")}
+            >
+              <div className="px-3 py-1.5 rounded-full bg-white/10 backdrop-blur border border-white/15 text-white/90 text-sm shadow">
+                📍 Εντοπίστηκε: κοντά σε εσάς
+              </div>
+            </div>
           </div>
           {/* λεπτό, διακριτικό sweep πάνω στο border */}
           <MapBorderSweep trigger={mapWave} radius={28} thickness={2} duration={0.65} fadeOutAfter={0.5} />
