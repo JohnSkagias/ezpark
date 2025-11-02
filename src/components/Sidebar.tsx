@@ -417,22 +417,23 @@ export default function Sidebar({ onSearch, onWave, onUserLocation }: Props) {
               {/* Backdrop (πιο διακριτικό) */}
               <motion.button
                 type="button"
-                className="absolute inset-0 rounded-[32px]"
+                className="fixed inset-0 z-[80] bg-transparent"   // fixed full-screen, καθόλου dim
                 onClick={() => setShowAdv(false)}
                 initial={{ opacity: 0 }}
-                animate={{ opacity: 0.25 }}
+                animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.18, ease: "easeOut" }}
+                transition={{ duration: 0.12 }}
                 aria-label="Κλείσιμο"
               />
+
 
               {/* Panel ─ “genie” από κάτω-αριστερά, με glass */}
               <motion.div
                 className="
-                  relative
+                  absolute z-[90]
                   w-[min(96%,580px)]
                   rounded-3xl border border-white/12
-                  bg-white/6 backdrop-blur-2xl
+                  bg-white/4 backdrop-blur-md
                   shadow-[0_10px_40px_rgba(0,0,0,.45)]
                   p-3 sm:p-4 overflow-hidden
                 "
@@ -473,16 +474,17 @@ export default function Sidebar({ onSearch, onWave, onUserLocation }: Props) {
                   className="pointer-events-none absolute inset-0"
                   style={{
                     background:
-                      "radial-gradient(1200px 300px at -10% 110%, rgba(16,185,129,0.09), transparent 60%), radial-gradient(900px 240px at 110% -10%, rgba(59,130,246,0.08), transparent 55%)",
+                      "radial-gradient(1200px 300px at -10% 110%, rgba(16,185,129,0.06), transparent 62%), radial-gradient(900px 240px at 110% -10%, rgba(59,130,246,0.05), transparent 58%)",
                   }}
                   animate={{ opacity: [0.85, 1, 0.85] }}
                   transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
                 />
 
+
                 {/* === CONTENT === */}
 
                 {/* Days grid: balanced στο mobile (4 στήλες) και 7 στο sm+ */}
-                <div className="rounded-[20px] ring-1 ring-white/10 bg-white/[.04] backdrop-blur-md px-3 py-2">
+                <div className="rounded-[20px] ring-1 ring-white/10 bg-white/[.02] backdrop-blur-md px-3 py-2">
                   <div className="grid grid-cols-4 sm:grid-cols-7 gap-2.5 place-items-center">
                     {days.map((d) => {
                       const isAllScope = scope === "all";
