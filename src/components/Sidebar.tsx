@@ -6,7 +6,7 @@ import { Button } from "./ui/button"; //δεν χρησιμοποιείται π
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import SearchWaveButton from "@/components/ui/SearchWaveButton";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 
 type Props = {
@@ -114,9 +114,22 @@ export default function Sidebar({ onSearch, onWave, onUserLocation }: Props) {
   const [hovered, setHovered] = useState<"night" | "long" | null>(null);
   const ACTIVE = "#5dd14bc3";
 
+  // anchor & viewport
+  const asideRef = useRef<HTMLElement | null>(null);
+  const advBtnRef = useRef<HTMLButtonElement | null>(null);
+  const [anchor, setAnchor] = useState<{ x: number; y: number }>({ x: 12, y: 12 });
+  const [isNarrow, setIsNarrow] = useState(false);
+
+  useEffect(() => {
+    const calc = () => setIsNarrow(typeof window !== "undefined" && window.innerWidth < 1022);
+    calc();
+    window.addEventListener("resize", calc);
+    return () => window.removeEventListener("resize", calc);
+  }, []);
+
 
   return (
-    <aside className="h-full p-4 sm:p-5 text-white">
+    <aside ref={asideRef} className="relative h-full p-4 sm:p-5 text-white">
       <div className="flex flex-col h-full justify-between">
         <div className="space-y-3 sm:space-y-4">
           <div className="flex items-center justify-center">
@@ -349,16 +362,29 @@ export default function Sidebar({ onSearch, onWave, onUserLocation }: Props) {
 
           <div className="mt-4 flex items-center gap-3">
             <button
+              ref={advBtnRef}
               className="text-left text-white/40 hover:text-white/50 underline underline-offset-4"
               onClick={() => {
-                // sync drafts με τις τρέχουσες “εφαρμοσμένες” τιμές
+                // sync drafts με τις “εφαρμοσμένες” τιμές
                 setDraftDay(advDay);
                 setDraftRadius(advRadius);
+
+                // Υπολόγισε anchor για desktop: κάτω-αριστερά του κουμπιού
+                try {
+                  if (advBtnRef.current && asideRef.current) {
+                    const br = advBtnRef.current.getBoundingClientRect();
+                    const ar = asideRef.current.getBoundingClientRect();
+                    // left = κουμπί.left - aside.left, top = κουμπί.bottom - aside.top
+                    setAnchor({ x: Math.max(12, br.left - ar.left), y: br.bottom - ar.top + 8 });
+                  }
+                } catch { }
+
                 setShowAdv(true);
               }}
             >
               Σύνθετες Επιλογές
             </button>
+
 
             {advDay !== undefined && (
               <button
@@ -382,121 +408,173 @@ export default function Sidebar({ onSearch, onWave, onUserLocation }: Props) {
           </div>
         </div>
 
-        {/* --- ADVANCED POPUP --- */}
-        {showAdv && (
-          <div className="absolute inset-0 z-30 flex items-center justify-center">
-            {/* backdrop */}
-            <div className="absolute inset-0 bg-black/0 rounded-[32px]" onClick={() => setShowAdv(false)} />
-            {/* panel */}
-            <div className="relative w-[94%] sm:w-[92%] rounded-2xl sm:rounded-[28px] border border-white/20 backdrop-blur bg-neutral-800/20 p-3 sm:p-4">
-              {/* Days pill */}
-              <div className="rounded-full bg-white/10 px-4 py-2 flex flex-wrap gap-3 items-center justify-center">
-                {days.map((d) => {
-                  const isAllScope = scope === "all";
-                  const isActive = isAllScope ? advDay === d.iso : draftDay === d.iso;
 
-                  return (
-                    <button
-                      key={d.iso}
-                      onClick={() => {
-                        if (isAllScope) {
-                          // — scope=all: auto-apply με ένα click —
-                          const newDay = advDay === d.iso ? undefined : d.iso;
-                          setAdvDay(newDay);
-                          setShowAdv(false);
-                          onSearch({
-                            lat, lng,
-                            radius,     // στο "Όλα" δεν χρησιμοποιούμε advRadius
-                            mode,
-                            weekday: newDay,
-                          });
-                          onWave?.();
-                        } else {
-                          // — scope=addr: αλλάζουμε ΜΟΝΟ τα drafts —
-                          setDraftDay((prev) => (prev === d.iso ? undefined : d.iso));
-                        }
-                      }}
-                      className={[
-                        "px-2 sm:px-3 py-1 rounded-full font-medium",
-                        isActive ? "bg-emerald-500 text-white" : "text-emerald-300 hover:bg-white/10",
-                      ].join(" ")}
-                    >
-                      {d.label}
-                    </button>
-                  );
-                })}
-              </div>
+        {/* --- ADVANCED POPUP (animated genie + glass) --- */}
+        <AnimatePresence>
+          {showAdv && (
+            // anchor bottom-left: εμφανίζεται από κάτω αριστερά του sidebar
+            <div className="absolute inset-0 z-30 flex items-end justify-start p-3 sm:p-4">
+              {/* Backdrop (πιο διακριτικό) */}
+              <motion.button
+                type="button"
+                className="absolute inset-0 rounded-[32px]"
+                onClick={() => setShowAdv(false)}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.25 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.18, ease: "easeOut" }}
+                aria-label="Κλείσιμο"
+              />
 
+              {/* Panel ─ “genie” από κάτω-αριστερά, με glass */}
+              <motion.div
+                className="
+                  relative
+                  w-[min(96%,580px)]
+                  rounded-3xl border border-white/12
+                  bg-white/6 backdrop-blur-2xl
+                  shadow-[0_10px_40px_rgba(0,0,0,.45)]
+                  p-3 sm:p-4 overflow-hidden
+                "
+                style={{ transformOrigin: "bottom left" }}
+                // πιο έντονο genie: scale + translate + clipPath spring
+                initial={{
+                  opacity: 0,
+                  scale: 0.78,
+                  y: 14,
+                  clipPath: "inset(60% 60% 0% 0% round 36px)",
+                  filter: "blur(6px)",
+                }}
+                animate={{
+                  opacity: 1,
+                  scale: 1,
+                  y: 0,
+                  clipPath: "inset(0% 0% 0% 0% round 24px)",
+                  filter: "blur(0px)",
+                  transition: {
+                    type: "spring",
+                    stiffness: 520,
+                    damping: 30,
+                    mass: 0.9,
+                  },
+                }}
+                exit={{
+                  opacity: 0,
+                  scale: 0.9,
+                  y: 12,
+                  clipPath: "inset(40% 40% 0% 0% round 28px)",
+                  filter: "blur(8px)",
+                  transition: { duration: 0.18, ease: "easeInOut" },
+                }}
+              >
+                {/* διακριτικό glass highlight */}
+                <motion.div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0"
+                  style={{
+                    background:
+                      "radial-gradient(1200px 300px at -10% 110%, rgba(16,185,129,0.09), transparent 60%), radial-gradient(900px 240px at 110% -10%, rgba(59,130,246,0.08), transparent 55%)",
+                  }}
+                  animate={{ opacity: [0.85, 1, 0.85] }}
+                  transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                />
 
-              {/* Radius μόνο όταν scope = 'addr' */}
-              {scope === "addr" && (
-                <div className="mt-5">
-                  <div className="rounded-[20px] bg-white/15 px-4 py-3">
-                    <input
-                      type="range"
-                      min={300}
-                      max={2000}
-                      step={50}
-                      value={draftRadius}
-                      onChange={(e) => setDraftRadius(parseInt(e.target.value))}
-                      className="w-full accent-emerald-500"
-                    />
-                    <div className="flex justify-between text-sm mt-2">
-                      <span>Ακτίνα: {draftRadius} μ</span>
-                      <button
-                        className="text-white/70 hover:text-white"
-                        onClick={() => {
-                          // reset drafts (δεν κλείνει, δεν εφαρμόζει)
-                          setDraftRadius(1000);
-                          setDraftDay(undefined);
-                        }}
-                      >
-                        Άκυρο
-                      </button>
-                    </div>
+                {/* === CONTENT === */}
+
+                {/* Days grid: balanced στο mobile (4 στήλες) και 7 στο sm+ */}
+                <div className="rounded-[20px] ring-1 ring-white/10 bg-white/[.04] backdrop-blur-md px-3 py-2">
+                  <div className="grid grid-cols-4 sm:grid-cols-7 gap-2.5 place-items-center">
+                    {days.map((d) => {
+                      const isAllScope = scope === "all";
+                      const isActive = isAllScope ? advDay === d.iso : draftDay === d.iso;
+
+                      return (
+                        <motion.button
+                          key={d.iso}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => {
+                            if (isAllScope) {
+                              // scope=all: auto-apply με ένα click
+                              const newDay = advDay === d.iso ? undefined : d.iso;
+                              setAdvDay(newDay);
+                              setShowAdv(false);
+                              onSearch({ lat, lng, radius, mode, weekday: newDay });
+                              onWave?.();
+                            } else {
+                              // scope=addr: αλλαγή στα drafts
+                              setDraftDay(prev => (prev === d.iso ? undefined : d.iso));
+                            }
+                          }}
+                          className={[
+                            "px-3 py-1.5 text-[15px] font-semibold rounded-full",
+                            "transition-colors",
+                            isActive
+                              ? "bg-emerald-500 text-white shadow-[0_6px_22px_rgba(16,185,129,.28)]"
+                              : "text-emerald-300 hover:bg-white/10",
+                          ].join(" ")}
+                        >
+                          {d.label}
+                        </motion.button>
+                      );
+                    })}
                   </div>
                 </div>
-              )}
 
+                {/* Radius μόνο όταν scope = 'addr' */}
+                {scope === "addr" && (
+                  <div className="mt-4">
+                    <div className="rounded-[20px] ring-1 ring-white/10 bg-white/[.05] backdrop-blur px-4 py-3">
+                      <input
+                        type="range"
+                        min={300}
+                        max={2000}
+                        step={50}
+                        value={draftRadius}
+                        onChange={(e) => setDraftRadius(parseInt(e.target.value))}
+                        className="w-full accent-emerald-500"
+                      />
+                      <div className="flex justify-between text-sm mt-2">
+                        <span>Ακτίνα: {draftRadius} μ</span>
+                        <button
+                          className="text-white/70 hover:text-white"
+                          onClick={() => { setDraftRadius(1000); setDraftDay(undefined); }}
+                        >
+                          Άκυρο
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
-              {/* actions */}
-              {scope === "addr" ? (
-                <div className="mt-4 flex justify-end gap-2">
-                  <button
-                    className="px-4 py-2 rounded-full bg-white/10 hover:bg-white/20"
-                    onClick={() => {
-                      // Cancel: κλείνει και ΕΠΑΝΑΦΕΡΕΙ τα drafts στις “εφαρμοσμένες” τιμές
-                      setDraftDay(advDay);
-                      setDraftRadius(advRadius);
-                      setShowAdv(false);
-                    }}
-                  >
-                    Άκυρο
-                  </button>
-                  <button
-                    className="px-4 py-2 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white"
-                    onClick={() => {
-                      // Apply: ενημερώνει τις “εφαρμοσμένες” τιμές & τρέχει search
-                      setAdvDay(draftDay);
-                      setAdvRadius(draftRadius);
-                      setShowAdv(false);
-                      onSearch({
-                        lat, lng,
-                        radius: draftRadius || 1000,
-                        mode,
-                        weekday: draftDay,
-                      });
-                      onWave?.();
-                    }}
-                  >
-                    Εφαρμογή
-                  </button>
-                </div>
-              ) : null}
-
+                {/* actions (μόνο για addr) */}
+                {scope === "addr" ? (
+                  <div className="mt-3 flex justify-end gap-2">
+                    <button
+                      className="px-4 py-2 rounded-full bg-white/10 hover:bg-white/20"
+                      onClick={() => { setDraftDay(advDay); setDraftRadius(advRadius); setShowAdv(false); }}
+                    >
+                      Άκυρο
+                    </button>
+                    <button
+                      className="px-4 py-2 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white"
+                      onClick={() => {
+                        setAdvDay(draftDay);
+                        setAdvRadius(draftRadius);
+                        setShowAdv(false);
+                        onSearch({ lat, lng, radius: draftRadius || 1000, mode, weekday: draftDay });
+                        onWave?.();
+                      }}
+                    >
+                      Εφαρμογή
+                    </button>
+                  </div>
+                ) : null}
+              </motion.div>
             </div>
-          </div>
-        )}
+          )}
+        </AnimatePresence>
+
+
       </div>
     </aside >
   );
