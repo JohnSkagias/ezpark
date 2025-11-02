@@ -1,15 +1,19 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import CookieConsent from "@/components/CookieConsent";
+// Αν θέλεις αργότερα να κάνεις gate τα analytics με consent:
+// import ConsentGate from "@/components/ConsentGate";
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from '@vercel/speed-insights/next';
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
+
 export const metadata: Metadata = {
   title: "ezpark",
-  description: "Finding Parking Made Easier",
+  description: "Finding Parking in Athens Made Easier",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -23,8 +27,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="shortcut icon" href="/favicon.ico" />
       </head>
 
-      <body className="min-h-screen bg-[#181A17] text-white">
+      <body className={`min-h-screen bg-[#181A17] text-white ${geistSans.variable} ${geistMono.variable}`}>
         {children}
+
+        {/* Client component – render απευθείας */}
+        <CookieConsent />
+
+        {/* Αν κάποια στιγμή θες gating για analytics με συναίνεση: 
+        <ConsentGate>
+          <Analytics />
+        </ConsentGate>
+        */}
+
+        {/* Όπως το έχεις τώρα: */}
         <Analytics />
         <SpeedInsights />
       </body>

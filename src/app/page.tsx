@@ -5,6 +5,7 @@ import Map from "../components/Map";
 import ResultsList from "../components/ResultsList";
 import MapBorderSweep from "@/components/ui/MapBorderSweep";
 import Link from "next/link";
+import { openConsentBanner } from "@/lib/consent";
 
 export default function HomePage() {
   const [data, setData] = useState<GeoJSON.FeatureCollection>({ type: "FeatureCollection", features: [] });
@@ -267,6 +268,15 @@ export default function HomePage() {
             <Link href="/cookies" className="hover:text-white transition-colors">
               🍪 Πολιτική Cookies
             </Link>
+            <span aria-hidden className="text-white/30">•</span>
+            <button
+              type="button"
+              onClick={() => openConsentBanner()}
+              className="hover:text-white transition-colors text-sm"
+              aria-label="Ρυθμίσεις Cookies"
+            >
+              ⚙️ Ρυθμίσεις Cookies
+            </button>
           </div>
         </footer>
 

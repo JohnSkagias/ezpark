@@ -174,3 +174,14 @@
   animation: ez-spin 1s linear infinite;             /* 1s ανά κύκλο */
 }
 @keyframes ez-spin { to { transform: rotate(360deg);} }
+
+
+
+@keyframes ez-slide-up {
+  from { transform: translateY(8px); opacity: 0; }
+  to   { transform: translateY(0);   opacity: 1; }
+}
+
+.animate-ez-slide-up {
+  animation: ez-slide-up .35s ease-out;
+}
