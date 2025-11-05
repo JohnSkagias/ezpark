@@ -137,11 +137,20 @@ export default function ResultsList({ features, onSelect }: Props) {
       {/* Desktop (>=1024px): scrollable container ~400px */}
       <div
         ref={listRef}
+        tabIndex={0} // ώστε να μπορεί να πάρει focus και να φανεί ο scrollbar κι έτσι
+        onPointerMove={() => {
+          setSbActive(true);
+          if (hideTimerRef.current) window.clearTimeout(hideTimerRef.current);
+          hideTimerRef.current = window.setTimeout(() => setSbActive(false), 1000);
+        }}
+        onWheel={() => {
+          setSbActive(true);
+          if (hideTimerRef.current) window.clearTimeout(hideTimerRef.current);
+          hideTimerRef.current = window.setTimeout(() => setSbActive(false), 1000);
+        }}
         className={[
-          // mobile: καμία αλλαγή
-          // desktop: contained scrolling + thin white scrollbar
           "lg:h-[400px] lg:overflow-y-auto lg:overscroll-contain lg:pr-1",
-          "ez-scroll", // custom scrollbar από το globals.css
+          "ez-scroll",
           sbActive ? "ez-scroll--active" : "",
         ].join(" ")}
       >
@@ -217,7 +226,7 @@ export default function ResultsList({ features, onSelect }: Props) {
         >
           {/* μικρό βελάκι */}
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
-            <path d="M12 5l0 14M12 5l-6 6M12 5l6 6" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M12 5l0 14M12 5l-6 6M12 5l6 6" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
       )}
