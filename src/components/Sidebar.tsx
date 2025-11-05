@@ -13,10 +13,11 @@ type Props = {
   onSearch: (p: { lat: number; lng: number; radius: number; mode: "night" | "long"; weekday?: number }) => void;
   onWave?: () => void;
   onUserLocation?: (p: { lat: number; lng: number }) => void;
+  onModeChange?: (m: "night" | "long") => void;
 };
 
 
-export default function Sidebar({ onSearch, onWave, onUserLocation }: Props) {
+export default function Sidebar({ onSearch, onWave, onUserLocation, onModeChange }: Props) {
   const [mode, setMode] = useState<"night" | "long">("night");
   const [scope, setScope] = useState<"all" | "addr">("all");
 
@@ -54,8 +55,15 @@ export default function Sidebar({ onSearch, onWave, onUserLocation }: Props) {
   }, [addr, scope]);
 
 
+  useEffect(() => {
+    onModeChange?.(mode);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, onModeChange]);
+
+
   const handleMode = (m: "night" | "long") => {
     setMode(m);
+    onModeChange?.(m);
     // onSearch({ lat, lng, radius: scope === "addr" ? (advRadius || 1500) : radius, mode: m, weekday: advDay });
   };
 

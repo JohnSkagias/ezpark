@@ -14,6 +14,7 @@ export default function HomePage() {
   const dayNameGR = (d: Date) => new Intl.DateTimeFormat("el-GR", { weekday: "long" }).format(d).replace(/^./, (c) => c.toUpperCase());
   const dayNames = ["", "Δευτέρα", "Τρίτη", "Τετάρτη", "Πέμπτη", "Παρασκευή", "Σάββατο", "Κυριακή"];
   const mapRef = useRef<HTMLDivElement>(null);
+  const [sidebarMode, setSidebarMode] = useState<"night" | "long">("night");
 
   const smoothScrollTo = (targetY: number, duration = 1100) => {
     const startY = window.pageYOffset;
@@ -200,12 +201,27 @@ export default function HomePage() {
     <main className="grid grid-cols-1 lg:grid-cols-[33vw_1fr] min-h-screen gap-6 lg:gap-10 p-4 lg:p-8">
       <div className="relative">
         <div className="lg:sticky lg:top-6">
-          <div className="rounded-3xl lg:rounded-[46px] border border-white/30 overflow-hidden
-                          p-4 sm:p-5 lg:p-12
-                          h-auto lg:min-h-[calc(98vh-3rem)]
-                          bg-no-repeat bg-cover bg-center"
-            style={{ backgroundImage: "url('/sidebarBackground.svg')" }}>
-            <Sidebar onSearch={runSearchNoPulse} onWave={triggerMapWave} onUserLocation={({ lat, lng }) => setUserLoc([lng, lat])} />
+          <div className="relative rounded-3xl lg:rounded-[46px] border border-white/30 overflow-hidden
+             p-4 sm:p-5 lg:p-12
+             h-auto lg:min-h-[calc(98vh-3rem)]
+             bg-no-repeat bg-cover bg-center"
+            style={{ backgroundImage: "url('/sidebarBackground.svg')" }}
+          >
+            {/* BLUE/DARK OVERLAY μόνο όταν mode === 'long' */}
+            <div
+              aria-hidden
+              className={[
+                "pointer-events-none absolute inset-0 transition-opacity duration-700 ease-[cubic-bezier(0.25, 0.1, 0.25, 1.0)]",
+                sidebarMode === "long" ? "opacity-100" : "opacity-0",
+              ].join(" ")}
+              style={{
+                background:
+                  "radial-gradient(120% 80% at 100% 0%, rgba(60,120,200,0.18), transparent 60%), " +
+                  "linear-gradient(180deg, rgba(0,0,0,0.20), rgba(0,0,0,0.38))",
+                mixBlendMode: "normal",
+              }}
+            />
+            <Sidebar onSearch={runSearchNoPulse} onWave={triggerMapWave} onUserLocation={({ lat, lng }) => setUserLoc([lng, lat])} onModeChange={setSidebarMode} />
           </div>
         </div>
       </div>
