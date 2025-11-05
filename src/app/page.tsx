@@ -211,7 +211,7 @@ export default function HomePage() {
             <div
               aria-hidden
               className={[
-                "pointer-events-none absolute inset-0 transition-opacity duration-700 ease-[cubic-bezier(0.25, 0.1, 0.25, 1.0)]",
+                "pointer-events-none absolute inset-0 transition-opacity duration-300 ease-in-out",
                 sidebarMode === "long" ? "opacity-100" : "opacity-0",
               ].join(" ")}
               style={{
