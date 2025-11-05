@@ -217,7 +217,7 @@ export default function ResultsList({ features, onSelect }: Props) {
           onClick={scrollListToTop}
           aria-label="Επιστροφή στην αρχή της λίστας"
           className="
-            lg:hidden fixed bottom-20 right-4 z-40
+            lg:hidden fixed bottom-6 right-4 z-40
             h-12 w-12 rounded-full grid place-items-center
             bg-white/60 text-[#12590d] shadow-lg
             border border-white/70 backdrop-blur
