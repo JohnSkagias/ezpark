@@ -6,6 +6,8 @@ import ResultsList from "../components/ResultsList";
 import MapBorderSweep from "@/components/ui/MapBorderSweep";
 import Link from "next/link";
 import { openConsentBanner } from "@/lib/consent";
+import IntroTour from "@/components/IntroTour";
+
 
 export default function HomePage() {
   const [data, setData] = useState<GeoJSON.FeatureCollection>({ type: "FeatureCollection", features: [] });
@@ -15,6 +17,7 @@ export default function HomePage() {
   const dayNames = ["", "Δευτέρα", "Τρίτη", "Τετάρτη", "Πέμπτη", "Παρασκευή", "Σάββατο", "Κυριακή"];
   const mapRef = useRef<HTMLDivElement>(null);
   const [sidebarMode, setSidebarMode] = useState<"night" | "long">("night");
+
 
   const smoothScrollTo = (targetY: number, duration = 1100) => {
     const startY = window.pageYOffset;
@@ -195,6 +198,35 @@ export default function HomePage() {
 
 
 
+  // Intro controls
+  const [introOpen, setIntroOpen] = useState(false);
+  const [showIntroCta, setShowIntroCta] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const KEY = "ezp_seen_intro_v1";
+    const seen = localStorage.getItem(KEY);
+
+    if (!seen) {
+      setShowIntroCta(true);
+      // αυτο-απόκρυψη CTA μετά από ~8s
+      const t = setTimeout(() => setShowIntroCta(false), 8000);
+      return () => clearTimeout(t);
+    }
+  }, []);
+
+  const openIntro = () => {
+    setIntroOpen(true);
+  };
+
+  const closeIntro = () => {
+    setIntroOpen(false);
+    try {
+      // localStorage.setItem("ezp_seen_intro_v1", "1");
+    } catch { }
+  };
+
+
 
 
   return (
@@ -221,7 +253,7 @@ export default function HomePage() {
                 mixBlendMode: "normal",
               }}
             />
-            <Sidebar onSearch={runSearchNoPulse} onWave={triggerMapWave} onUserLocation={({ lat, lng }) => setUserLoc([lng, lat])} onModeChange={setSidebarMode} />
+            <Sidebar onSearch={runSearchNoPulse} onWave={triggerMapWave} onUserLocation={({ lat, lng }) => setUserLoc([lng, lat])} onModeChange={setSidebarMode} showIntroCta={showIntroCta} onIntroClick={() => { setShowIntroCta(false); openIntro(); }} />
           </div>
         </div>
       </div>
@@ -269,6 +301,10 @@ export default function HomePage() {
 
         <h3 className="text-lg font-semibold text-white/90">Αποτελέσματα ({data.features.length})</h3>
         <ResultsList features={data.features ?? []} onSelect={handleSelectFromList} />
+
+        {/* Intro multi-step (responsive: sheet / modal) */}
+        <IntroTour open={introOpen} onClose={closeIntro} />
+
 
         <footer className="mt-10 py-6 text-center text-white/60 border-t border-white/10">
           <div className="text-xs">© 2025 EzPark. All rights reserved.</div>

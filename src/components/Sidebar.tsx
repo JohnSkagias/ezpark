@@ -14,10 +14,12 @@ type Props = {
   onWave?: () => void;
   onUserLocation?: (p: { lat: number; lng: number }) => void;
   onModeChange?: (m: "night" | "long") => void;
+  showIntroCta?: boolean;       // αν θα δείξουμε intro button
+  onIntroClick?: () => void;    // άνοιγμα του IntroTour
 };
 
 
-export default function Sidebar({ onSearch, onWave, onUserLocation, onModeChange }: Props) {
+export default function Sidebar({ onSearch, onWave, onUserLocation, onModeChange, showIntroCta, onIntroClick }: Props) {
   const [mode, setMode] = useState<"night" | "long">("night");
   const [scope, setScope] = useState<"all" | "addr">("all");
 
@@ -144,276 +146,305 @@ export default function Sidebar({ onSearch, onWave, onUserLocation, onModeChange
             <img src="/ezparkTitle.svg" alt="ezpark.gr" className="h-18 lg:h-26 w-auto" />
           </div>
 
-          {/* Mode segmented */}
-          <div className="relative rounded-full bg-white/10 p-1.5 sm:p-2 mt-3 lg:mt-[clamp(1.5rem,6vh,5rem)] overflow-hidden">
-            {/* Slider πίσω από τα κουμπιά */}
-            <motion.div
-              aria-hidden
-              className="absolute inset-y-2 left-2 rounded-full transition-[box-shadow,filter] duration-300 ease-in-out"
-              style={{
-                width: "calc(50% - 0.5rem)",
-                backgroundColor: ACTIVE, // #5dd14baf
-                boxShadow:
-                  hovered === mode
-                    ? "0 10px 28px rgba(93,209,75,.32), 0 0 22px rgba(93,209,75,.34)"
-                    : "0 8px 20px rgba(93,209,75,.22), 0 0 14px rgba(93,209,75,.20)",
-                filter: hovered === mode ? "brightness(0.94)" : "none",
-                willChange: "transform",
-              }}
-              animate={{ x: mode === "night" ? 0 : "100%" }}
-              transition={{
-                type: "spring",
-                stiffness: 320,
-                damping: 25,
-                mass: 0.9,
-                bounce: 0.35,
-              }}
-            />
-
-
-
-            <div className="relative grid grid-cols-2 gap-0">
-              {/* Left */}
-              <motion.button
-                onHoverStart={() => setHovered("night")}
-                onHoverEnd={() => setHovered(null)}
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                onClick={() => handleMode("night")}
-                className={[
-                  "z-10 px-3 py-2 lg:px-4 lg:py-3 text-sm font-medium rounded-full",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/60",
-                  mode === "night" ? "text-white" : "text-white/85 hover:text-white",
-                ].join(" ")}
-              >
-                Βραδινή Έξοδος
-              </motion.button>
-
-              {/* Right */}
-              <motion.button
-                onHoverStart={() => setHovered("long")}
-                onHoverEnd={() => setHovered(null)}
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                onClick={() => handleMode("long")}
-                className={[
-                  "z-10 px-3 py-2 lg:px-4 lg:py-3 text-sm font-medium rounded-full",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/60",
-                  mode === "long" ? "text-white" : "text-white/85 hover:text-white",
-                ].join(" ")}
-              >
-                Μόνιμη Στάθμευση
-              </motion.button>
-            </div>
-          </div>
-
-          {/* Scope segmented */}
-          <div className="relative rounded-full bg-white/10 p-1.5 sm:p-2 overflow-hidden mt-2.5">
-            {/* slider πίσω από τα κουμπιά */}
-            <motion.div
-              aria-hidden
-              className="absolute inset-y-2 left-2 rounded-full transition-[box-shadow,filter] duration-300 ease-in-out"
-              style={{
-                width: "calc(50% - 0.5rem)",
-                backgroundColor: "#446ab0ff",
-                boxShadow:
-                  // μόνιμο ελαφρύ glow στο ενεργό + θα γίνει πιο δυνατό όταν hoverάρεις το ενεργό button
-                  (/* θα δυναμώσει με hover από το state των buttons παρακάτω */ "0 8px 20px rgba(68, 106, 176, 0.3), 0 0 14px rgba(68, 106, 176, 0.4)"),
-                willChange: "transform",
-              }}
-              // springy slide (bounce) όπως πάνω
-              animate={{ x: scope === "all" ? 0 : "100%" }}
-              transition={{
-                type: "spring",
-                stiffness: 320,
-                damping: 25,
-                mass: 0.9,
-                bounce: 0.35,
-              }}
-            />
-
-            <div className="relative grid grid-cols-2">
-              {/* Left: Όλα */}
-              <motion.button
-                onHoverStart={() => {
-                  if (scope === "all") {
-                    // ενισχύουμε προσωρινά το glow του slider όταν hoverάρεις το ενεργό
-                    const s = (document?.currentScript as any)?.ownerDocument ?? document;
-                    const el = (s.querySelector?.(":scope") ? (null as any) : null); // no-op για TS
-                  }
-                }}
-                onMouseEnter={(e) => {
-                  if (scope === "all") {
-                    const slider = (e.currentTarget.parentElement!.previousElementSibling as HTMLDivElement);
-                    slider.style.boxShadow = "0 10px 28px rgba(68,106,176,.30), 0 0 22px rgba(68,106,176,.34)";
-                    slider.style.filter = "brightness(0.94)";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (scope === "all") {
-                    const slider = (e.currentTarget.parentElement!.previousElementSibling as HTMLDivElement);
-                    slider.style.boxShadow = "0 8px 20px rgba(68,106,176,.22), 0 0 14px rgba(68,106,176,.20)";
-                    slider.style.filter = "none";
-                  }
-                }}
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                onClick={() => setScope("all")}
-                className={[
-                  "z-10 px-3 py-2 lg:px-4 lg:py-3 text-sm font-medium rounded-full",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300/60",
-                  scope === "all" ? "text-white" : "text-white/85 hover:text-white",
-                ].join(" ")}
-              >
-                Όλα
-              </motion.button>
-
-              {/* Right: Συγκεκριμένη Διεύθυνση */}
-              <motion.button
-                onMouseEnter={(e) => {
-                  if (scope === "addr") {
-                    const slider = (e.currentTarget.parentElement!.previousElementSibling as HTMLDivElement);
-                    slider.style.boxShadow = "0 10px 28px rgba(68,106,176,.30), 0 0 22px rgba(68,106,176,.34)";
-                    slider.style.filter = "brightness(0.94)";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (scope === "addr") {
-                    const slider = (e.currentTarget.parentElement!.previousElementSibling as HTMLDivElement);
-                    slider.style.boxShadow = "0 8px 20px rgba(68,106,176,.22), 0 0 14px rgba(68,106,176,.20)";
-                    slider.style.filter = "none";
-                  }
-                }}
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                onClick={() => setScope("addr")}
-                className={[
-                  "z-10 px-3 py-2 lg:px-4 lg:py-3 text-sm font-medium rounded-full",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300/60",
-                  scope === "addr" ? "text-white" : "text-white/85 hover:text-white",
-                ].join(" ")}
-              >
-                Συγκεκριμένη Διεύθυνση
-              </motion.button>
-            </div>
-          </div>
-
-          {scope === "addr" && (
-            <div className="space-y-1 relative">
-              <Label className="text-white/80">Διεύθυνση</Label>
-              <div className="flex items-center gap-2">
-                <Input
-                  value={addr}
-                  onChange={(e) => setAddr(e.target.value)}
-                  placeholder="π.χ. Πραξιτέλους Πειραιάς"
-                  className="flex-1 bg-white/5 px-4 py-5 lg:py-5 rounded-[18px] border-white/10 text-white placeholder:text-white/60"
-                />
-
-                <button
-                  type="button"
-                  onClick={handleUseMyLocation}
-                  aria-label="Χρήση τρέχουσας τοποθεσίας"
-                  className={[
-                    "relative shrink-0 h-11 w-11 rounded-full border border-white/30 bg-white/5 flex items-center justify-center transition disabled:opacity-60",
-                    locating ? "locating-sweep" : "hover:bg-white/10"
-                  ].join(" ")}
-                  disabled={locating}
-                  title="Χρήση τρέχουσας τοποθεσίας"
+          {/* Intro CTA – εμφανίζεται αν το ζήτησε ο γονέας (πρώτη επίσκεψη, 8s) */}
+          <motion.div layout className="mb-2" transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}>
+            <AnimatePresence mode="popLayout"> {/* <<-- άλλαξε από initial={false} */}
+              {showIntroCta && (
+                <motion.button
+                  key="intro-cta"
+                  layout                           // <<-- ΝΕΟ
+                  onClick={onIntroClick}
+                  initial={{ opacity: 0, y: -10, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -8, scale: 0.98 }}
+                  transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                  className="
+                    mx-auto mb-4 block
+                    rounded-full px-4 py-2
+                    text-[14px] lg:text-[15px] font-semibold tracking-tight
+                    text-white bg-white/14 hover:bg-white/18
+                    ring-1 ring-white/25 backdrop-blur-lg shadow-sm
+                  "
                 >
-                  {locating ? (
-                    <span className="block h-5 w-5 rounded-full border-2 border-white/70 border-t-transparent animate-spin" />
-                  ) : (
-                    <img src="/locationIcon.svg" alt="" className="h-12 w-12 opacity-90" />
-                  )}
-                </button>
-              </div>
-
-              {suggests.length > 0 && (
-                <div className="absolute z-20 mt-1 w-full rounded-xl border border-white/10 bg-black/30 backdrop-blur p-1 max-h-64 overflow-auto">
-                  {suggests.map((s, i) => (
-                    <button
-                      key={i}
-                      className="block w-full text-left px-3 py-2 rounded-lg hover:bg-white/10"
-                      onClick={() => {
-                        const label = s.secondary ? `${s.primary}, ${s.secondary}` : s.primary;
-                        setAddr(label);
-                        setSuggests([]);
-                        setLat(s.lat);
-                        setLng(s.lng);
-                        // onSearch({ lat: s.lat, lng: s.lng, radius: advRadius || 1000, mode, weekday: advDay });
-                      }}
-                    >
-                      <div className="font-medium">{s.primary}</div>
-                      {s.secondary && <div className="text-xs text-white/60">{s.secondary}</div>}
-                    </button>
-                  ))}
-                </div>
+                  Τι είναι το ezpark.gr;
+                </motion.button>
               )}
+            </AnimatePresence>
+          </motion.div>
 
-              {/* hint + geo error */}
-              <div className="flex items-start justify-between">
-                <p className="text-xs text-white/60">* Γράψε διεύθυνση, περιοχή, μαγαζί κτλπ</p>
-                {geoErr && <p className="text-xs text-rose-300">{geoErr}</p>}
+
+          <motion.div layout>
+            {/* Mode segmented */}
+            <div className="relative rounded-full bg-white/10 p-1.5 sm:p-2 mt-3 lg:mt-[clamp(1.5rem,6vh,5rem)] overflow-hidden">
+              {/* Slider πίσω από τα κουμπιά */}
+              <motion.div
+                aria-hidden
+                className="absolute inset-y-2 left-2 rounded-full transition-[box-shadow,filter] duration-300 ease-in-out"
+                style={{
+                  width: "calc(50% - 0.5rem)",
+                  backgroundColor: ACTIVE, // #5dd14baf
+                  boxShadow:
+                    hovered === mode
+                      ? "0 10px 28px rgba(93,209,75,.32), 0 0 22px rgba(93,209,75,.34)"
+                      : "0 8px 20px rgba(93,209,75,.22), 0 0 14px rgba(93,209,75,.20)",
+                  filter: hovered === mode ? "brightness(0.94)" : "none",
+                  willChange: "transform",
+                }}
+                animate={{ x: mode === "night" ? 0 : "100%" }}
+                transition={{
+                  type: "spring",
+                  stiffness: 320,
+                  damping: 25,
+                  mass: 0.9,
+                  bounce: 0.35,
+                }}
+              />
+
+
+
+              <div className="relative grid grid-cols-2 gap-0">
+                {/* Left */}
+                <motion.button
+                  onHoverStart={() => setHovered("night")}
+                  onHoverEnd={() => setHovered(null)}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => handleMode("night")}
+                  className={[
+                    "z-10 px-3 py-2 lg:px-4 lg:py-3 text-sm font-medium rounded-full",
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/60",
+                    mode === "night" ? "text-white" : "text-white/85 hover:text-white",
+                  ].join(" ")}
+                >
+                  Βραδινή Έξοδος
+                </motion.button>
+
+                {/* Right */}
+                <motion.button
+                  onHoverStart={() => setHovered("long")}
+                  onHoverEnd={() => setHovered(null)}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => handleMode("long")}
+                  className={[
+                    "z-10 px-3 py-2 lg:px-4 lg:py-3 text-sm font-medium rounded-full",
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/60",
+                    mode === "long" ? "text-white" : "text-white/85 hover:text-white",
+                  ].join(" ")}
+                >
+                  Μόνιμη Στάθμευση
+                </motion.button>
               </div>
             </div>
-          )}
 
-          {/* Αναζήτηση */}
-          <div className="mt-2.5 sm:mt-3">
-            <SearchWaveButton
-              className="mt-4"
-              onClick={() => onSearch({ lat, lng, radius: scope === "addr" ? (advRadius || 1000) : radius, mode, weekday: advDay })}
-              onWaveDone={onWave}
-            />
-          </div>
-
-
-          <div className="mt-4 flex items-center gap-3">
-            <button
-              ref={advBtnRef}
-              className="text-left text-white/40 hover:text-white/50 underline underline-offset-4"
-              onClick={() => {
-                // sync drafts με τις “εφαρμοσμένες” τιμές
-                setDraftDay(advDay);
-                setDraftRadius(advRadius);
-
-                // Υπολόγισε anchor για desktop: κάτω-αριστερά του κουμπιού
-                try {
-                  if (advBtnRef.current && asideRef.current) {
-                    const br = advBtnRef.current.getBoundingClientRect();
-                    const ar = asideRef.current.getBoundingClientRect();
-                    // left = κουμπί.left - aside.left, top = κουμπί.bottom - aside.top
-                    setAnchor({ x: Math.max(12, br.left - ar.left), y: br.bottom - ar.top + 8 });
-                  }
-                } catch { }
-
-                setShowAdv(true);
-              }}
-            >
-              Σύνθετες Επιλογές
-            </button>
-
-
-            {advDay !== undefined && (
-              <button
-                onClick={() => {
-                  setAdvDay(undefined);
-                  // (προαιρετικά) επαναφορά radius
-                  // setAdvRadius(1000);
-                  onSearch({
-                    lat, lng,
-                    radius: scope === "addr" ? (advRadius || 1000) : radius,
-                    mode,
-                    // χωρίς weekday => επιστρέφεις στη standard λογική today/tomorrow
-                  });
+            {/* Scope segmented */}
+            <div className="relative rounded-full bg-white/10 p-1.5 sm:p-2 overflow-hidden mt-2.5">
+              {/* slider πίσω από τα κουμπιά */}
+              <motion.div
+                aria-hidden
+                className="absolute inset-y-2 left-2 rounded-full transition-[box-shadow,filter] duration-300 ease-in-out"
+                style={{
+                  width: "calc(50% - 0.5rem)",
+                  backgroundColor: "#446ab0ff",
+                  boxShadow:
+                    // μόνιμο ελαφρύ glow στο ενεργό + θα γίνει πιο δυνατό όταν hoverάρεις το ενεργό button
+                    (/* θα δυναμώσει με hover από το state των buttons παρακάτω */ "0 8px 20px rgba(68, 106, 176, 0.3), 0 0 14px rgba(68, 106, 176, 0.4)"),
+                  willChange: "transform",
                 }}
-                className="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-xs border border-white/10"
-                title="Αφαίρεση φίλτρων"
-              >
-                Φίλτρα ενεργά — Επαναφορά
-              </button>
+                // springy slide (bounce) όπως πάνω
+                animate={{ x: scope === "all" ? 0 : "100%" }}
+                transition={{
+                  type: "spring",
+                  stiffness: 320,
+                  damping: 25,
+                  mass: 0.9,
+                  bounce: 0.35,
+                }}
+              />
+
+              <div className="relative grid grid-cols-2">
+                {/* Left: Όλα */}
+                <motion.button
+                  onHoverStart={() => {
+                    if (scope === "all") {
+                      // ενισχύουμε προσωρινά το glow του slider όταν hoverάρεις το ενεργό
+                      const s = (document?.currentScript as any)?.ownerDocument ?? document;
+                      const el = (s.querySelector?.(":scope") ? (null as any) : null); // no-op για TS
+                    }
+                  }}
+                  onMouseEnter={(e) => {
+                    if (scope === "all") {
+                      const slider = (e.currentTarget.parentElement!.previousElementSibling as HTMLDivElement);
+                      slider.style.boxShadow = "0 10px 28px rgba(68,106,176,.30), 0 0 22px rgba(68,106,176,.34)";
+                      slider.style.filter = "brightness(0.94)";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (scope === "all") {
+                      const slider = (e.currentTarget.parentElement!.previousElementSibling as HTMLDivElement);
+                      slider.style.boxShadow = "0 8px 20px rgba(68,106,176,.22), 0 0 14px rgba(68,106,176,.20)";
+                      slider.style.filter = "none";
+                    }
+                  }}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => setScope("all")}
+                  className={[
+                    "z-10 px-3 py-2 lg:px-4 lg:py-3 text-sm font-medium rounded-full",
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300/60",
+                    scope === "all" ? "text-white" : "text-white/85 hover:text-white",
+                  ].join(" ")}
+                >
+                  Όλα
+                </motion.button>
+
+                {/* Right: Συγκεκριμένη Διεύθυνση */}
+                <motion.button
+                  onMouseEnter={(e) => {
+                    if (scope === "addr") {
+                      const slider = (e.currentTarget.parentElement!.previousElementSibling as HTMLDivElement);
+                      slider.style.boxShadow = "0 10px 28px rgba(68,106,176,.30), 0 0 22px rgba(68,106,176,.34)";
+                      slider.style.filter = "brightness(0.94)";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (scope === "addr") {
+                      const slider = (e.currentTarget.parentElement!.previousElementSibling as HTMLDivElement);
+                      slider.style.boxShadow = "0 8px 20px rgba(68,106,176,.22), 0 0 14px rgba(68,106,176,.20)";
+                      slider.style.filter = "none";
+                    }
+                  }}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => setScope("addr")}
+                  className={[
+                    "z-10 px-3 py-2 lg:px-4 lg:py-3 text-sm font-medium rounded-full",
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300/60",
+                    scope === "addr" ? "text-white" : "text-white/85 hover:text-white",
+                  ].join(" ")}
+                >
+                  Συγκεκριμένη Διεύθυνση
+                </motion.button>
+              </div>
+            </div>
+
+            {scope === "addr" && (
+              <div className="space-y-1 relative">
+                <Label className="text-white/80">Διεύθυνση</Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={addr}
+                    onChange={(e) => setAddr(e.target.value)}
+                    placeholder="π.χ. Πραξιτέλους Πειραιάς"
+                    className="flex-1 bg-white/5 px-4 py-5 lg:py-5 rounded-[18px] border-white/10 text-white placeholder:text-white/60"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={handleUseMyLocation}
+                    aria-label="Χρήση τρέχουσας τοποθεσίας"
+                    className={[
+                      "relative shrink-0 h-11 w-11 rounded-full border border-white/30 bg-white/5 flex items-center justify-center transition disabled:opacity-60",
+                      locating ? "locating-sweep" : "hover:bg-white/10"
+                    ].join(" ")}
+                    disabled={locating}
+                    title="Χρήση τρέχουσας τοποθεσίας"
+                  >
+                    {locating ? (
+                      <span className="block h-5 w-5 rounded-full border-2 border-white/70 border-t-transparent animate-spin" />
+                    ) : (
+                      <img src="/locationIcon.svg" alt="" className="h-12 w-12 opacity-90" />
+                    )}
+                  </button>
+                </div>
+
+                {suggests.length > 0 && (
+                  <div className="absolute z-20 mt-1 w-full rounded-xl border border-white/10 bg-black/30 backdrop-blur p-1 max-h-64 overflow-auto">
+                    {suggests.map((s, i) => (
+                      <button
+                        key={i}
+                        className="block w-full text-left px-3 py-2 rounded-lg hover:bg-white/10"
+                        onClick={() => {
+                          const label = s.secondary ? `${s.primary}, ${s.secondary}` : s.primary;
+                          setAddr(label);
+                          setSuggests([]);
+                          setLat(s.lat);
+                          setLng(s.lng);
+                          // onSearch({ lat: s.lat, lng: s.lng, radius: advRadius || 1000, mode, weekday: advDay });
+                        }}
+                      >
+                        <div className="font-medium">{s.primary}</div>
+                        {s.secondary && <div className="text-xs text-white/60">{s.secondary}</div>}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* hint + geo error */}
+                <div className="flex items-start justify-between">
+                  <p className="text-xs text-white/60">* Γράψε διεύθυνση, περιοχή, μαγαζί κτλπ</p>
+                  {geoErr && <p className="text-xs text-rose-300">{geoErr}</p>}
+                </div>
+              </div>
             )}
-          </div>
+
+            {/* Αναζήτηση */}
+            <div className="mt-2.5 sm:mt-3">
+              <SearchWaveButton
+                className="mt-4"
+                onClick={() => onSearch({ lat, lng, radius: scope === "addr" ? (advRadius || 1000) : radius, mode, weekday: advDay })}
+                onWaveDone={onWave}
+              />
+            </div>
+
+
+            <div className="mt-4 flex items-center gap-3">
+              <button
+                ref={advBtnRef}
+                className="text-left text-white/40 hover:text-white/50 underline underline-offset-4"
+                onClick={() => {
+                  // sync drafts με τις “εφαρμοσμένες” τιμές
+                  setDraftDay(advDay);
+                  setDraftRadius(advRadius);
+
+                  // Υπολόγισε anchor για desktop: κάτω-αριστερά του κουμπιού
+                  try {
+                    if (advBtnRef.current && asideRef.current) {
+                      const br = advBtnRef.current.getBoundingClientRect();
+                      const ar = asideRef.current.getBoundingClientRect();
+                      // left = κουμπί.left - aside.left, top = κουμπί.bottom - aside.top
+                      setAnchor({ x: Math.max(12, br.left - ar.left), y: br.bottom - ar.top + 8 });
+                    }
+                  } catch { }
+
+                  setShowAdv(true);
+                }}
+              >
+                Σύνθετες Επιλογές
+              </button>
+
+
+              {advDay !== undefined && (
+                <button
+                  onClick={() => {
+                    setAdvDay(undefined);
+                    // (προαιρετικά) επαναφορά radius
+                    // setAdvRadius(1000);
+                    onSearch({
+                      lat, lng,
+                      radius: scope === "addr" ? (advRadius || 1000) : radius,
+                      mode,
+                      // χωρίς weekday => επιστρέφεις στη standard λογική today/tomorrow
+                    });
+                  }}
+                  className="px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-xs border border-white/10"
+                  title="Αφαίρεση φίλτρων"
+                >
+                  Φίλτρα ενεργά — Επαναφορά
+                </button>
+              )}
+            </div>
+          </motion.div>
         </div>
 
 
