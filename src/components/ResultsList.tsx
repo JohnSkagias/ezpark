@@ -11,8 +11,13 @@ export default function ResultsList({ features, onSelect }: Props) {
   // δείξε/κρύψε το back-to-top ΜΟΝΟ σε mobile
   const [showBackToTop, setShowBackToTop] = useState(false);
 
+  // desktop scroll container + auto-hide scrollbar
+  const listRef = useRef<HTMLDivElement | null>(null);
+  const [sbActive, setSbActive] = useState(false);
+  const hideTimerRef = useRef<number | null>(null);
+
   useEffect(() => {
-    const onScroll = () => {
+    const onWindowScrollOrResize = () => {
       if (typeof window === "undefined") return;
       const isMobile = window.innerWidth < 1024;
       if (!isMobile || !topRef.current) {
@@ -20,17 +25,56 @@ export default function ResultsList({ features, onSelect }: Props) {
         return;
       }
       const top = topRef.current.getBoundingClientRect().top;
-      // όταν η κορυφή της λίστας έχει ανέβει ~60px πάνω από το viewport, εμφανίσου
       setShowBackToTop(top < -60);
     };
 
-    // αρχικο έλεγχο + listeners μόνο για mobile
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
+    onWindowScrollOrResize();
+    window.addEventListener("scroll", onWindowScrollOrResize, { passive: true });
+    window.addEventListener("resize", onWindowScrollOrResize);
     return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
+      window.removeEventListener("scroll", onWindowScrollOrResize);
+      window.removeEventListener("resize", onWindowScrollOrResize);
+    };
+  }, []);
+
+  // ενεργοποίηση/απενεργοποίηση scrollbar (desktop only)
+  useEffect(() => {
+    const el = listRef.current;
+    if (!el) return;
+
+    const isDesktop = () => window.innerWidth >= 1024;
+
+    const activate = () => {
+      if (!isDesktop()) return;
+      setSbActive(true);
+      if (hideTimerRef.current) window.clearTimeout(hideTimerRef.current);
+      hideTimerRef.current = window.setTimeout(() => setSbActive(false), 1000); // 1s αδράνεια
+    };
+
+    const onScroll = () => activate();
+    const onEnter = () => activate();
+    const onLeave = () => {
+      if (!isDesktop()) return;
+      if (hideTimerRef.current) window.clearTimeout(hideTimerRef.current);
+      // fade out αμέσως μόλις φύγει το ποντίκι (πιο καθαρό)
+      setSbActive(false);
+    };
+
+    el.addEventListener("scroll", onScroll, { passive: true });
+    el.addEventListener("mouseenter", onEnter);
+    el.addEventListener("mouseleave", onLeave);
+
+    // αρχικά: αν desktop, εμφανίσε το για 1s
+    if (typeof window !== "undefined" && isDesktop()) {
+      setSbActive(true);
+      hideTimerRef.current = window.setTimeout(() => setSbActive(false), 1000);
+    }
+
+    return () => {
+      el.removeEventListener("scroll", onScroll);
+      el.removeEventListener("mouseenter", onEnter);
+      el.removeEventListener("mouseleave", onLeave);
+      if (hideTimerRef.current) window.clearTimeout(hideTimerRef.current);
     };
   }, []);
 
@@ -90,36 +134,35 @@ export default function ResultsList({ features, onSelect }: Props) {
 
   return (
     <div className="space-y-3" ref={topRef}>
-      {/* 
-        Desktop (>=1024px): scrollable container ~400px ύψος.
-        Mobile: ΑΠΛΑ render χωρίς wrapper scrolling (ίδιο UI όπως πριν).
-      */}
+      {/* Desktop (>=1024px): scrollable container ~400px */}
       <div
-        className="
-          /* mobile: καμία αλλαγή */
-          /* desktop: κάνε contained scrolling */
-          lg:h-[400px] lg:overflow-y-auto lg:overscroll-contain lg:pr-1
-          /* προαιρετικά κρυψιμο σκρολμπαρ: */
-          [scrollbar-width:none] [&::-webkit-scrollbar]:hidden
-        "
+        ref={listRef}
+        className={[
+          // mobile: καμία αλλαγή
+          // desktop: contained scrolling + thin white scrollbar
+          "lg:h-[400px] lg:overflow-y-auto lg:overscroll-contain lg:pr-1",
+          "ez-scroll", // custom scrollbar από το globals.css
+          sbActive ? "ez-scroll--active" : "",
+        ].join(" ")}
       >
         <div className="flex flex-col gap-3">
           {features.map((f, i) => {
             const p = (f.properties as any) || {};
             const name = p.name ?? "Οδός";
             const muni = p.municipality ?? "";
-            const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${name}, ${muni}`)}`;
+            const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+              `${name}, ${muni}`
+            )}`;
 
             return (
-              // ✅ κρατάμε το key στο ΕΞΩ wrapper σου (όπως ήταν)
               <div
                 key={i}
                 onClick={() => onSelect?.(f)}
                 className="group relative overflow-hidden w-full rounded-[22px] border border-white/20
-                   bg-gradient-to-r from-#3A5145 to-emerald-600/30
-                   px-5 py-4 hover:from-emerald-700/30 hover:to-emerald-600/20 transition cursor-pointer"
+                   bg-gradient-to-r from-#3A5145 to-emerald-900/30
+                   px-5 py-4 hover:from-emerald-900/30 hover:to-emerald-600/20 transition cursor-pointer"
               >
-                {/* shimmer λωρίδα στο hover (καθαρά CSS) */}
+                {/* shimmer λωρίδα στο hover */}
                 <span
                   aria-hidden
                   className="pointer-events-none absolute inset-0 -translate-x-full
@@ -127,12 +170,10 @@ export default function ResultsList({ features, onSelect }: Props) {
                      transition-transform duration-700 ease-out group-hover:translate-x-full"
                 />
 
-                {/* 👇 ΕΔΩ μπαίνει η κίνηση, μέσα στο wrapper */}
                 <motion.div
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-                  // μικρό lift σε hover (δεν επηρεάζει το key/wrapper)
                   whileHover={{ y: -2, scale: 1.01 }}
                   style={{ willChange: "transform, opacity" }}
                   className="flex items-center justify-between text-white"
@@ -161,20 +202,23 @@ export default function ResultsList({ features, onSelect }: Props) {
         </div>
       </div>
 
-      {/* Mobile-only back-to-top button (διακριτικό white glass) */}
+      {/* Mobile-only back-to-top (κυκλικό) */}
       {showBackToTop && (
         <button
           onClick={scrollListToTop}
           aria-label="Επιστροφή στην αρχή της λίστας"
           className="
             lg:hidden fixed bottom-20 right-4 z-40
-            rounded-full px-3 py-3
-            bg-white/25 text-white shadow-lg
-            border border-white/30 backdrop-blur
+            h-12 w-12 rounded-full grid place-items-center
+            bg-white/60 text-[#12590d] shadow-lg
+            border border-white/70 backdrop-blur
             active:scale-95 transition
           "
         >
-          ↑
+          {/* μικρό βελάκι */}
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
+            <path d="M12 5l0 14M12 5l-6 6M12 5l6 6" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
         </button>
       )}
     </div>
