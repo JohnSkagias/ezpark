@@ -1,6 +1,13 @@
 "use client";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Πολιτική Cookies",
+  description: "Πώς χρησιμοποιούμε cookies στο EzPark.",
+  alternates: { canonical: "/cookies" },
+};
 
 export default function CookiesPage() {
   return (
