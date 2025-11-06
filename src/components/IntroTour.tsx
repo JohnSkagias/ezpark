@@ -19,7 +19,7 @@ export default function IntroTour({ open, onClose }: IntroTourProps) {
   const steps: Step[] = useMemo(
     () => [
       {
-        title: "Καλώς ήρθες στο EzPark",
+        title: "Καλώς ήρθες στο EzPark!",
         body: (
           <p className="text-white/80 leading-relaxed">
             Ο σκοπός του EzPark είναι να σε βοηθήσει να βρίσκεις πιο εύκολα parking στην
@@ -66,7 +66,7 @@ export default function IntroTour({ open, onClose }: IntroTourProps) {
             <ol className="list-decimal pl-5 space-y-2">
               <li>
                 Να γράψεις <span className="font-semibold">όνομα δρόμου, περιοχή, γειτονιά ή
-                μαγαζί</span> και θα δεις αποτελέσματα σε ακτίνα <span className="font-semibold">1km</span>.
+                  μαγαζί</span> και θα δεις αποτελέσματα σε ακτίνα <span className="font-semibold">1km</span>.
               </li>
               <li>
                 Να πατήσεις το <span className="font-semibold">κουμπί τοποθεσίας</span> δίπλα
@@ -87,9 +87,9 @@ export default function IntroTour({ open, onClose }: IntroTourProps) {
         body: (
           <ul className="space-y-3 text-white/80 leading-relaxed">
             <li>
-              Κάνε <span className="font-semibold">zoom</span> και <span className="font-semibold">μετακινήσου</span> στον χάρτη, 
+              Κάνε <span className="font-semibold">zoom</span> και <span className="font-semibold">μετακινήσου</span> στον χάρτη,
               όπου θα δεις <span className="font-semibold">πινέζες</span> με προτάσεις για οδούς.
-                Πάτησε πάνω σε μία για λεπτομέριες, και δυνατότητα άμεσης αναζήτησης στους χάρτες πατώντας{" "}
+              Πάτησε πάνω σε μία για λεπτομέριες, και δυνατότητα άμεσης αναζήτησης στους χάρτες πατώντας{" "}
               <span className="font-semibold">Open in Google Maps</span>.
             </li>
             <li>
@@ -118,16 +118,21 @@ export default function IntroTour({ open, onClose }: IntroTourProps) {
             onClick={onClose}
           />
 
-          {/* Container: bottom sheet (mobile), centered modal (desktop) */}
+          {/* 
+            Wrapper:
+            - Mobile: fixed top-0, height = 100svh, items-end => κάθεται πάντα ΣΤΟΝ ΠΑΤΟ του visible viewport.
+            - Desktop: centered.
+          */}
           <div
             className="
               fixed z-[90]
-              inset-x-0 bottom-0 lg:inset-0
-              flex lg:items-center lg:justify-center
+              inset-x-0 top-0 lg:inset-0
+              h-[100svh] lg:h-auto
+              flex items-end lg:items-center lg:justify-center
               pointer-events-none
             "
           >
-            {/* Card: layout-enabled για smooth αλλαγή ύψους */}
+            {/* Card (layout-enabled για smooth αλλαγή ύψους/περιεχομένου) */}
             <motion.div
               key="intro-card"
               layout
@@ -145,10 +150,10 @@ export default function IntroTour({ open, onClose }: IntroTourProps) {
                 rounded-t-3xl lg:rounded-3xl
                 bg-[rgba(20,24,22,0.9)] text-white
                 backdrop-blur-xl ring-1 ring-white/15 shadow-2xl
-                max-h-[88vh] overflow-hidden
+                min-h-[auto] max-h-[100svh] lg:max-h-[88vh] overflow-hidden
               "
               style={{
-                // στο mobile να «κολλάει» μέχρι κάτω με safe area
+                // στο mobile, να «κάθεται» πάνω από τη safe-area μπάρα
                 paddingBottom: "max(16px, env(safe-area-inset-bottom))",
               }}
             >
@@ -157,7 +162,7 @@ export default function IntroTour({ open, onClose }: IntroTourProps) {
                 <span className="h-1.5 w-12 rounded-full bg-white/20" />
               </div>
 
-              {/* Περιεχόμενο ως στήλη: τίτλος/κείμενο πάνω, footer ΚΟΛΛΗΜΕΝΟ στον πάτο */}
+              {/* Περιεχόμενο ως στήλη: τίτλος/κείμενο πάνω, footer κολλημένο στον πάτο */}
               <motion.div
                 layout
                 className="px-5 py-6 lg:px-8 lg:py-8 flex flex-col"
@@ -168,7 +173,7 @@ export default function IntroTour({ open, onClose }: IntroTourProps) {
                   {steps[i].title}
                 </h3>
 
-                {/* Σώμα step – αλλάζει με smooth height */}
+                {/* Σώμα step */}
                 <AnimatePresence mode="popLayout">
                   <motion.div
                     key={i}
@@ -183,12 +188,12 @@ export default function IntroTour({ open, onClose }: IntroTourProps) {
                   </motion.div>
                 </AnimatePresence>
 
-                {/* Footer κολλημένο στον πάτο της κάρτας */}
+                {/* Footer — πάντα στον πάτο της κάρτας */}
                 <motion.div
                   layout
                   className="mt-8 lg:mt-10 flex items-center justify-between pt-2"
                   transition={{ layout: { duration: 0.35, ease: [0.22, 1, 0.36, 1] } }}
-                  style={{ marginTop: "auto" }} // << κολλάει στον πάτο
+                  style={{ marginTop: "auto" }}
                 >
                   <div className="text-xs text-white/55">
                     Βήμα {i + 1} / {steps.length}

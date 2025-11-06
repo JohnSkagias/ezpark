@@ -222,6 +222,7 @@ export default function HomePage() {
   const closeIntro = () => {
     setIntroOpen(false);
     try {
+      //to exw kanei comment, an vgei apo comment tote to intro den tha ksanapaiksei efoson to exei dei o xristis
       // localStorage.setItem("ezp_seen_intro_v1", "1");
     } catch { }
   };
