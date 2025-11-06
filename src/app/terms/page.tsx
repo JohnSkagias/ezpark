@@ -3,11 +3,11 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = {
-  title: "Όροι Χρήσης",
-  description: "Όροι χρήσης της υπηρεσίας EzPark.",
-  alternates: { canonical: "/terms" },
-};
+// export const metadata: Metadata = {
+//   title: "Όροι Χρήσης",
+//   description: "Όροι χρήσης της υπηρεσίας EzPark.",
+//   alternates: { canonical: "/terms" },
+// };
 
 export default function TermsPage() {
   return (
