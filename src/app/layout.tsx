@@ -25,11 +25,20 @@ export const metadata: Metadata = {
   keywords: [
     "ezpark",
     "ezparkgr",
+    "εζπαρκ",
+    "ez park",
+    "easypark",
+    "easy park",
     "parking",
     "παρκινγκ",
     "στάθμευση",
     "σταθμευση Αθήνα",
     "Αθήνα parking",
+    "Πειραιάς parking",
+    "Γλυφάδα parking",
+    "Χαλάνδρι parking",
+    "παρκινγκ κοντα μου",
+    "parking κοντά μου",
     "παρκάρισμα Αθήνα",
     "σταθμευση",
     "λαϊκές αγορές",
@@ -74,8 +83,11 @@ export const metadata: Metadata = {
     { media: "(prefers-color-scheme: dark)", color: "#0b1f17" },
   ],
   icons: {
-    icon: "/favicon.ico",
-    apple: "/apple-touch-icon.png",
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },               // για Google SERP
+      { url: "/favicon-32x32.png", type: "image/png", sizes: "32x32" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
   },
 };
 
