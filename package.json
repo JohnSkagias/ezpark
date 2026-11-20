@@ -20,7 +20,7 @@
     "clsx": "^2.1.1",
     "framer-motion": "^11.18.2",
     "lucide-react": "^0.545.0",
-    "maplibre-gl": "^5.8.0",
+    "maplibre-gl": "^6.4.1",
     "next": "15.5.29",
     "react": "19.1.0",
     "react-dom": "19.1.0",
